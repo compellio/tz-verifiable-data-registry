@@ -13,8 +13,6 @@ class IssuerSchemaMapping(sp.Contract):
                         sp.TString
                     )
                 ),
-                issuer_id = sp.TString,
-                logic_contract_address = sp.TString
             )
         )
 
@@ -40,3 +38,8 @@ class IssuerSchemaMapping(sp.Contract):
         self.update_initial_storage(mapping = sp.big_map())
         sp.set_type(issuer_id, sp.TString)
         sp.set_type(schema_id, sp.TString)
+
+@sp.add_test(name = "IssuerSchemaMapping")
+def test():
+    
+    sp.add_compilation_target("issuerSchemaMapping", IssuerSchemaMapping('issuer_id', 'logic_contract_address'))

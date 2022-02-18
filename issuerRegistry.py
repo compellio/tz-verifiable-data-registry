@@ -9,16 +9,15 @@ class IssuerRegistry(sp.Contract):
                 mapping = sp.TBigMap(
                     sp.TString,
                     sp.TRecord(
-                        issuer_data = sp.TRecord(
-                            sp.TString,
-                            sp.TString
-                        ),
+                        issuer_data = sp.TString,
                         status = sp.TString
                     )
                 ),
-                issuer_did = sp.TString,
-                logic_contract_address = sp.TString
+                issuer_did = sp.TString
             )
+        )
+        self.init(
+            issuer_did = issuer_did
         )
 
     @sp.entry_point
@@ -36,3 +35,9 @@ class IssuerRegistry(sp.Contract):
     def get_data(self, issuer_did):
         self.update_initial_storage(mapping = sp.big_map())
         sp.set_type(issuer_did, sp.TString)
+
+@sp.add_test(name = "IssuerRegistry")
+def test():
+    
+    sp.add_compilation_target("issuerRegistry", IssuerRegistry('issuer_did', 'logic_contract_address'))
+    

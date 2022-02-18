@@ -9,15 +9,10 @@ class SchemaRegistry(sp.Contract):
                 mapping = sp.TBigMap(
                     sp.TString,
                     sp.TRecord(
-                        schema_data = sp.TRecord(
-                            sp.TString,
-                            sp.TString
-                        ),
+                        schema_data = sp.TString,
                         status = sp.TString
                     )
                 ),
-                schema_id = sp.TString,
-                logic_contract_address = sp.TString
             )
         )
 
@@ -36,3 +31,8 @@ class SchemaRegistry(sp.Contract):
     def get_data(self, schema_id):
         self.update_initial_storage(mapping = sp.big_map())
         sp.set_type(schema_id, sp.TString)
+
+@sp.add_test(name = "SchemaRegistry")
+def test():
+    
+    sp.add_compilation_target("schemaRegistry", SchemaRegistry('schema_id', 'logic_contract_address'))

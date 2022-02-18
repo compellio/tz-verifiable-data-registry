@@ -18,3 +18,8 @@ class SchemaRegistryLogic(sp.Contract):
     @sp.entry_point
     def revoke(self, schema_id):
         sp.set_type(schema_id, sp.TString)
+
+@sp.add_test(name = "SchemaRegistryLogic")
+def test():
+    
+    sp.add_compilation_target("schemaRegistryLogic", SchemaRegistryLogic('schema_id'))

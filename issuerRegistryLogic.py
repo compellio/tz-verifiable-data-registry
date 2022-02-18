@@ -2,7 +2,7 @@
 
 import smartpy as sp
 
-class issuerRegistryLogic(sp.Contract):
+class IssuerRegistryLogic(sp.Contract):
     def __init__(self, issuer_did):
         self.init_type(
             sp.TRecord(
@@ -18,3 +18,8 @@ class issuerRegistryLogic(sp.Contract):
     @sp.entry_point
     def revoke(self, issuer_did):
         sp.set_type(issuer_did, sp.TString)
+
+@sp.add_test(name = "IssuerRegistryLogic")
+def test():
+    
+    sp.add_compilation_target("issuerRegistryLogic", IssuerRegistryLogic('issuer_did'))
