@@ -9,6 +9,9 @@ class SchemaRegistryLogic(sp.Contract):
                 schema_id = sp.TString
             )
         )
+        self.init(
+            schema_id = schema_id
+        )
 
     @sp.entry_point
     def add(self, schema_id, schema_data):

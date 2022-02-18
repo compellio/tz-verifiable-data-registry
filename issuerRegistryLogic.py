@@ -9,6 +9,9 @@ class IssuerRegistryLogic(sp.Contract):
                 issuer_did = sp.TString
             )
         )
+        self.init(
+            issuer_did = issuer_did
+        )
 
     @sp.entry_point
     def add(self, issuer_did, issuer_data):

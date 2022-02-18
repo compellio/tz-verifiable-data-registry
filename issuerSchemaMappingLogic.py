@@ -9,6 +9,9 @@ class IssuerSchemaMappingLogic(sp.Contract):
                 issuer_id = sp.TString
             )
         )
+        self.init(
+            issuer_id = issuer_id
+        )
 
     @sp.entry_point
     def bind(self, issuer_id, schema_id):
