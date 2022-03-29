@@ -3,106 +3,60 @@
 import smartpy as sp
 
 class Registry(sp.Contract):
-    def __init__(self, address):
+    def __init__(self, certifier):
         self.init_type(
             sp.TRecord(
-                mapping = sp.TMap(
+                contracts = sp.TMap(
                     sp.TString,
-                    sp.TMap(
-                        sp.TString,
-                        sp.TRecord(
-                            contract_address = sp.TString,
-                            status = sp.TString
-                        )
-                    )
+                    sp.TAddress
                 ),
-                address = sp.TString
+                certifier = sp.TAddress
             )
         )
         self.init(
-            address = address
+            contracts = sp.map(),
+            certifier = certifier
         )
 
     @sp.entry_point
-    def update_status(self, contract_name, version, status):
-        self.data.mapping[contract_name] = {
-            version : sp.record(
-                contract_address = self.data.address,
-                status = status
-            ) 
-        }
-        
-    @sp.entry_point
-    def get_last_active_version(self, contract_name):
-        self.update_initial_storage(mapping = sp.map())
+    def update_contract_address(self, contract_name, address):
         sp.set_type(contract_name, sp.TString)
+        sp.set_type(address, sp.TAddress)
+
+        sp.verify(self.data.certifier == sp.source, message = "Incorrect certifier")
+        self.data.contracts[contract_name] = address
+
+    def get_last_active_version(self, contract_name):
+        return self.data.contracts[contract_name]
 
     @sp.entry_point
-    def add_issuer(self, version, issuer_did, issuer_data):
-        self.update_initial_storage(mapping = sp.map())
-        sp.set_type(version, sp.TString)
-        sp.set_type(issuer_did, sp.TString)
-        sp.set_type(issuer_data, sp.TString)
-
-    @sp.entry_point
-    def get_issuer(self, version, issuer_did):
-        self.update_initial_storage(mapping = sp.map())
-        sp.set_type(version, sp.TString)
-        sp.set_type(issuer_did, sp.TString)
-
-    @sp.entry_point
-    def revoke_issuer(self, version, issuer_did):
-        self.update_initial_storage(mapping = sp.map())
-        sp.set_type(version, sp.TString)
-        sp.set_type(issuer_did, sp.TString)
-
-    @sp.entry_point
-    def add_schema(self, version, schema_id, schema):
-        self.update_initial_storage(mapping = sp.map())
-        sp.set_type(version, sp.TString)
+    def add_schema(self, schema_id, schema_data):
         sp.set_type(schema_id, sp.TString)
-        sp.set_type(schema, sp.TString)
+        sp.set_type(schema_data, sp.TString)
 
-    @sp.entry_point
-    def get_schema(self, version, schema_id):
-        self.update_initial_storage(mapping = sp.map())
-        sp.set_type(version, sp.TString)
+        contract_data = sp.TRecord(schema_id = sp.TString, schema_data = sp.TString)
+        logic_contract = sp.contract(contract_data, self.get_last_active_version('schema_registry_contract'), "add").open_some()
+        
+        params = sp.record(
+            schema_id = schema_id,
+            schema_data = schema_data
+        )
+
+        sp.transfer(params, sp.mutez(0), logic_contract)
+
+    @sp.onchain_view()
+    def get_schema(self, schema_id):
         sp.set_type(schema_id, sp.TString)
+        
+        contract_address = sp.local("contract_address", self.get_last_active_version('schema_registry_contract'))
+        schema = sp.view("get", contract_address.value, schema_id, t = sp.TString).open_some("Invalid view");
+        sp.result(schema)
 
-    @sp.entry_point
-    def revoke_schema(self, version, issuer_did):
-        self.update_initial_storage(mapping = sp.map())
-        sp.set_type(version, sp.TString)
-        sp.set_type(issuer_did, sp.TString)
-
-    @sp.entry_point
-    def set_owner(self, version, issuer_did, schema_id):
-        self.update_initial_storage(mapping = sp.map())
-        sp.set_type(version, sp.TString)
-        sp.set_type(issuer_did, sp.TString)
-        sp.set_type(schema_id, sp.TString)
-
-    @sp.entry_point
-    def revoke_membership(self, version, issuer_did, schema_id):
-        self.update_initial_storage(mapping = sp.map())
-        sp.set_type(version, sp.TString)
-        sp.set_type(issuer_did, sp.TString)
-        sp.set_type(schema_id, sp.TString)
-
-    @sp.entry_point
-    def is_allowed(self, version, issuer_did, schema_id):
-        self.update_initial_storage(mapping = sp.map())
-        sp.set_type(version, sp.TString)
-        sp.set_type(issuer_did, sp.TString)
-        sp.set_type(schema_id, sp.TString)
-    
 @sp.add_test(name = "Registry")
 def test():
-    c1 = Registry('address')
-    scenario = sp.test_scenario()
-    scenario.h1("Registry")
-    scenario += c1
-    c1.update_status(contract_name = 'contract_name', version = 'version', status = 'status')
-    scenario.verify(c1.data.mapping['contract_name']['version'] == sp.record(contract_address = 'address', status = 'status'))
 
-    sp.add_compilation_target("registry", Registry('address'))
+    sp.add_compilation_target("registry",
+        Registry(
+            sp.address('tz1PvnsRQsdhfEUFdFg6Z4CQpeDhWbXEDswm')
+        )
+    )
