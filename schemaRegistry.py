@@ -75,9 +75,8 @@ def test():
     
     sp.add_compilation_target("schemaRegistry",
         SchemaRegistry(
-            sp.address('KT1Er5SLPtPucjDHdMRA4MCdhtt43bQJrdME'),
+            sp.address('KT1KTnCM9xfy2qYQgXyrgcbGq4SJpnUKeRRB'),
             sp.address('KT1LaMzuwMcNpaApiUqpRErT7GxhPjBXok3j'),
             sp.address('tz1PvnsRQsdhfEUFdFg6Z4CQpeDhWbXEDswm')
         )
-    )
     )
