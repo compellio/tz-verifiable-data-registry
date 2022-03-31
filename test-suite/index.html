@@ -1,0 +1,91 @@
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="./app.css">
+    <title>Issue Certificate</title>
+    <script type="module" src="./certifier.js"></script>
+</head>
+
+<body>
+    <div id="settings-bar">
+        <a href="#" class="btn btn-settings" id="btn_settings">Toggle Settings</a>
+        <a href="#" class="btn btn-connect" id="btn_connect">Connect Wallet</a>
+        <div id="settings-box">
+            <p>Settings</p>
+            <p class="form-title">Provider</p>
+            <input type="text" id="provider" class="form-input form-input-small">
+            <p class="form-title">Contract Address</p><input type="text" id="contractAddress"
+                class="form-input form-input-small">
+        </div>
+    </div>
+
+    <div id="app_container">
+        <div>
+            <div class="title-bar">Upload Schema</div>
+            <div class="content-box">
+                <table class="form-table">
+                    <tr>
+                        <td >
+                            <input class="form-input" type="text" id="schema_id" placeholder="ID" />
+                        </td>
+                        <td class="col-1">
+                            <input class="form-input" type="text" id="schema_data" placeholder="Schema Data" />
+                        </td>
+                        <td>
+                            <a href="#" id="btn_issue" class="btn btn-submit">Add</a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="title-bar">Get Schema</div>
+            <div class="content-box">
+                <table class="form-table">
+                    <tr>
+                        <td class="col-1">
+                            <input class="form-input" type="text" id="schema_id_get" placeholder="ID" />
+                        </td>
+                        <td>
+                            <a href="#" id="btn_get" class="btn btn-submit">Get</a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="title-bar">Upload Issuer</div>
+            <div class="content-box">
+                <table class="form-table">
+                    <tr>
+                        <td class="col-1">
+                            <input class="form-input" type="text" id="issuer_data" placeholder="Issuer Data" />
+                        </td>
+                        <td>
+                            <a href="#" id="btn_issuer_issue" class="btn btn-submit">Add</a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="title-bar">Get Issuer</div>
+            <div class="content-box">
+                <table class="form-table">
+                    <tr>
+                        <td class="col-1">
+                            <input class="form-input" type="text" id="issuer_id_get" placeholder="ID" />
+                        </td>
+                        <td>
+                            <a href="#" id="btn_issuer_get" class="btn btn-submit">Get</a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div id="result-bar" class="result-bar"></div>
+        </div>
+        <div class="overlay">
+            <div>Activate wallet before proceeding</div>
+        </div>
+    </div>
+</body>
+
+</html>
