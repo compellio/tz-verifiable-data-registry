@@ -22,4 +22,4 @@ You will need to have a **Wallet** on an existing Tezos Testnet. We have used **
 There are two ways to test the smart contracts:
 
 - Open https://better-call.dev/ in your browser, find your contract and navigate to the "Interact" Tab.
-- Download and extract our [Test Suite](https://github.com/compellio/tz-verifiable-data-registry/files/8388996/tz-verifiable-data-registry-test.zip). Run `npm install` and then `parcel index.html --no-cache`. Open the URL shown in your CMD and go to "Toggle Settings", insert your **Registry** contract address and test.
+- Navigate to the `test-suite` folder. Run `npm install` and then `parcel index.html --no-cache`. Open the URL shown in your CMD and go to "Toggle Settings", insert your **Registry** contract address and test.
