@@ -6,7 +6,7 @@ const { BeaconWallet } = require('@taquito/beacon-wallet');
 function initUI() {
     updateUISetting({
         provider: "https://hangzhounet.smartpy.io/",
-        contractAddress: "KT1MuadG9MbxSUQaqdUAWaXhJcQfgCwnjJMq"
+        contractAddress: "KT1RTfPB3zYyCq2hZS6ut9tRb7P1KRc1hCCf"
     });
 
     // setup UI actions
