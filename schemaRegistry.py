@@ -30,15 +30,26 @@ class SchemaRegistry(sp.Contract):
     def add(self, parameters):
         self.data.schema_map[self.data.schema_last_id] = parameters
         self.data.schema_last_id += 1
+
+    @sp.entry_point
+    def change_status(self, parameters):
+        sp.set_type(parameters.schema_id, sp.TNat)
+        sp.set_type(parameters.status, sp.TNat)
+
+        schema_data = self.data.schema_map[parameters.schema_id]
+        
+        with sp.modify_record(schema_data, "data") as data:
+            data.status = parameters.status
+
+        self.data.schema_map[parameters.schema_id] = schema_data
     
     @sp.onchain_view()
     def get(self, schema_id):
         sp.result(self.data.schema_map[schema_id])
-        
-    @sp.entry_point
-    def revoke(self, schema_id):
-        self.update_initial_storage(schema_map = sp.big_map())
-        sp.set_type(schema_id, sp.TString)
+
+    @sp.onchain_view()
+    def get_schema_owner_address(self, schema_id):
+        sp.result(self.data.schema_map[schema_id].schema_owner)
 
     @sp.entry_point
     def change_logic_contract_address(self, new_logic_contract_address):
@@ -55,10 +66,15 @@ def test():
     wallet_address = sp.test_account("Valid").address
     nonvalid_address = sp.test_account("NonValid").address
 
-    test_record = sp.record(
-        schema_id = "test_id",
-        schema_data = "Test",
+    test_add = sp.record(
+        schema_data = "data",
+        schema_owner = sp.address('tz1WM1wDM4mdtD3qMiELJSgbB14ZryyHNu7P'),
         status = 1
+    )
+
+    test_status = sp.record(
+        schema_id = 0,
+        status = 2
     )
 
     c1 = SchemaRegistry(
@@ -67,6 +83,10 @@ def test():
     )
 
     scenario += c1
+
+    c1.add(test_add).run(valid = True, sender = wallet_address)
+    scenario.verify(c1.get(0).schema_data == "data")
+    c1.change_status(test_status).run(valid = True, sender = wallet_address)
 
     sp.add_compilation_target("schemaRegistry",
         SchemaRegistry(

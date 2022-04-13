@@ -67,14 +67,88 @@ class RegistryLogic(sp.Contract):
         # Calling the Storage contract with the parameters we defined
         sp.transfer(params, sp.mutez(0), logic_contract)
 
+    def verify_owner_source_address(self, owner):
+        sp.set_type(owner, sp.TAddress)
+        return owner == sp.source
+
+    def get_schema_owner_address(self, schema_id):
+        schema_owner_address = sp.view(
+            "get_schema_owner_address",
+            self.get_contract_address('schema_registry_contract'),
+            schema_id,
+            t = sp.TAddress
+        ).open_some("Invalid view");
+
+        return schema_owner_address
+
+    @sp.entry_point
+    def set_schema_active(self, parameters):
+        sp.set_type(parameters.schema_id, sp.TNat)
+
+        owner_address = self.get_schema_owner_address(parameters.schema_id)
+        sp.verify(self.verify_owner_source_address(owner_address), message = "Incorrect owner")
+
+        contract_data = sp.TRecord(schema_id = sp.TNat, status = sp.TNat)
+        logic_contract = sp.contract(contract_data, self.get_contract_address('schema_registry_contract'), "change_status").open_some()
+
+        params = sp.record(
+            schema_id = parameters.schema_id,
+            status = 1
+        )
+
+        sp.transfer(params, sp.mutez(0), logic_contract)
+
+    @sp.entry_point
+    def set_schema_deprecated(self, parameters):
+        sp.set_type(parameters.schema_id, sp.TNat)
+
+        owner_address = self.get_schema_owner_address(parameters.schema_id)
+        sp.verify(self.verify_owner_source_address(owner_address), message = "Incorrect owner")
+
+        contract_data = sp.TRecord(schema_id = sp.TNat, status = sp.TNat)
+        logic_contract = sp.contract(contract_data, self.get_contract_address('schema_registry_contract'), "change_status").open_some()
+
+        params = sp.record(
+            schema_id = parameters.schema_id,
+            status = 2
+        )
+
+        sp.transfer(params, sp.mutez(0), logic_contract)
+
+    @sp.entry_point
+    def set_schema_status(self, parameters):
+        sp.set_type(parameters.schema_id, sp.TNat)
+        sp.set_type(parameters.status, sp.TNat)
+
+        owner_address = self.get_schema_owner_address(parameters.schema_id)
+        sp.verify(self.verify_owner_source_address(owner_address), message = "Incorrect owner")
+
+        contract_data = sp.TRecord(schema_id = sp.TNat, status = sp.TNat)
+        logic_contract = sp.contract(contract_data, self.get_contract_address('schema_registry_contract'), "change_status").open_some()
+
+        params = sp.record(
+            schema_id = parameters.schema_id,
+            status = parameters.status
+        )
+
+        sp.transfer(params, sp.mutez(0), logic_contract)
+
     @sp.onchain_view()
     def get_schema(self, schema_id):
         # Defining the parameters' types
         sp.set_type(schema_id, sp.TNat)
         
         # Defining the parameters' types
-        contract_address = sp.local("contract_address", self.get_contract_address('schema_registry_contract'))
-        schema = sp.view("get", contract_address.value, schema_id, t = sp.TRecord(schema_data = sp.TString, schema_owner = sp.TAddress, status = sp.TNat)).open_some("Invalid view");
+        schema = sp.view(
+            "get",
+            self.get_contract_address('schema_registry_contract'),
+            schema_id,
+            t = sp.TRecord(
+                schema_data = sp.TString,
+                schema_owner = sp.TAddress,
+                status = sp.TNat
+            )
+        ).open_some("Invalid view");
 
         result_schema = sp.record(
             schema_data = schema.schema_data,

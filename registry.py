@@ -41,14 +41,63 @@ class Registry(sp.Contract):
         # Calling the Storage contract with the parameters we defined
         sp.transfer(params, sp.mutez(0), logic_contract)
 
+    @sp.entry_point
+    def set_schema_active(self, schema_id):
+        sp.set_type(schema_id, sp.TNat)
+
+        contract_data = sp.TRecord(schema_id = sp.TNat)
+        logic_contract = sp.contract(contract_data, self.data.logic_contract, "set_schema_active").open_some()
+
+        params = sp.record(
+            schema_id = schema_id,
+        )
+
+        sp.transfer(params, sp.mutez(0), logic_contract)
+
+    @sp.entry_point
+    def set_schema_deprecated(self, schema_id):
+        sp.set_type(schema_id, sp.TNat)
+
+        contract_data = sp.TRecord(schema_id = sp.TNat)
+        logic_contract = sp.contract(contract_data, self.data.logic_contract, "set_schema_deprecated").open_some()
+
+        params = sp.record(
+            schema_id = schema_id,
+        )
+
+        sp.transfer(params, sp.mutez(0), logic_contract)
+
+    @sp.entry_point
+    def set_schema_status(self, schema_id, status):
+        sp.set_type(schema_id, sp.TNat)
+        sp.set_type(status, sp.TNat)
+
+        contract_data = sp.TRecord(schema_id = sp.TNat, status = sp.TNat)
+        logic_contract = sp.contract(contract_data, self.data.logic_contract, "set_schema_status").open_some()
+
+        params = sp.record(
+            schema_id = schema_id,
+            status = status
+        )
+
+        sp.transfer(params, sp.mutez(0), logic_contract)
+
     @sp.onchain_view()
     def get_schema(self, schema_id):
         # Defining the parameters' types
         sp.set_type(schema_id, sp.TNat)
         
         # Defining the parameters' types
-        contract_address = sp.local("contract_address", self.data.logic_contract)
-        schema = sp.view("get_schema", contract_address.value, schema_id, t = sp.TRecord(schema_data = sp.TString, status = sp.TString)).open_some("Invalid view");
+        schema = sp.view(
+            "get_schema",
+            self.data.logic_contract,
+            schema_id,
+            t = sp.TRecord(
+                schema_data = sp.TString,
+                status = sp.TString
+            )
+        ).open_some("Invalid view");
+        
         sp.result(schema)
 
 @sp.add_test(name = "Registry")
@@ -57,6 +106,6 @@ def test():
     sp.add_compilation_target("registry",
         Registry(
             sp.address('tz1WM1wDM4mdtD3qMiELJSgbB14ZryyHNu7P'),
-            sp.address('KT1NEoBGaMBwNMRDYZYoRtvTni3mjFN1td3S')
+            sp.address('KT1HMCMW1GZKJT4B6zmc3DQL6yQ5xZPbVtg4')
         )
     )
