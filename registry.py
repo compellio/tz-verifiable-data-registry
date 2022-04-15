@@ -3,7 +3,7 @@
 import smartpy as sp
 
 class Registry(sp.Contract):
-    def __init__(self, certifier, logic_contract):
+    def __init__(self, logic_contract, certifier):
         self.init_type(
             sp.TRecord(
                 logic_contract = sp.TAddress,
@@ -99,13 +99,94 @@ class Registry(sp.Contract):
         ).open_some("Invalid view");
         
         sp.result(schema)
+    
+    @sp.entry_point
+    def add_issuer(self, issuer_did, issuer_data):
+        # Defining the parameters' types
+        sp.set_type(issuer_did, sp.TString)
+        sp.set_type(issuer_data, sp.TString)
+
+        # Defining the data that we expect as a return from the Logic contract
+        contract_data = sp.TRecord(issuer_did = sp.TString, issuer_data = sp.TString)
+
+        # Defining the Logic contract itself and its entry point for the call
+        logic_contract = sp.contract(contract_data, self.data.logic_contract, "add_issuer").open_some()
+        
+        # Defining the parameters that will be passed to the Storage contract
+        params = sp.record(
+            issuer_did = issuer_did,
+            issuer_data = issuer_data
+        )
+
+        # Calling the Storage contract with the parameters we defined
+        sp.transfer(params, sp.mutez(0), logic_contract)
+
+    @sp.entry_point
+    def set_issuer_active(self, issuer_did):
+        sp.set_type(issuer_did, sp.TString)
+
+        contract_data = sp.TRecord(issuer_did = sp.TString)
+        logic_contract = sp.contract(contract_data, self.data.logic_contract, "set_issuer_active").open_some()
+
+        params = sp.record(
+            issuer_did = issuer_did,
+        )
+
+        sp.transfer(params, sp.mutez(0), logic_contract)
+
+    @sp.entry_point
+    def set_issuer_deprecated(self, issuer_did):
+        sp.set_type(issuer_did, sp.TString)
+
+        contract_data = sp.TRecord(issuer_did = sp.TString)
+        logic_contract = sp.contract(contract_data, self.data.logic_contract, "set_issuer_deprecated").open_some()
+
+        params = sp.record(
+            issuer_did = issuer_did,
+        )
+
+        sp.transfer(params, sp.mutez(0), logic_contract)
+
+    @sp.entry_point
+    def set_issuer_status(self, issuer_did, status):
+        sp.set_type(issuer_did, sp.TString)
+        sp.set_type(status, sp.TNat)
+
+        contract_data = sp.TRecord(issuer_did = sp.TString, status = sp.TNat)
+        logic_contract = sp.contract(contract_data, self.data.logic_contract, "set_issuer_status").open_some()
+
+        params = sp.record(
+            issuer_did = issuer_did,
+            status = status
+        )
+
+        sp.transfer(params, sp.mutez(0), logic_contract)
+
+    @sp.onchain_view()
+    def get_issuer(self, issuer_did):
+        # Defining the parameters' types
+        sp.set_type(issuer_did, sp.TNat)
+        
+        # Defining the parameters' types
+        issuer = sp.view(
+            "get_issuer",
+            self.data.logic_contract,
+            issuer_did,
+            t = sp.TRecord(
+                issuer_did  = sp.TString,
+                issuer_data = sp.TString,
+                status = sp.TString
+            )
+        ).open_some("Invalid view");
+        
+        sp.result(issuer)
 
 @sp.add_test(name = "Registry")
 def test():
 
     sp.add_compilation_target("registry",
         Registry(
-            sp.address('tz1WM1wDM4mdtD3qMiELJSgbB14ZryyHNu7P'),
-            sp.address('KT1HMCMW1GZKJT4B6zmc3DQL6yQ5xZPbVtg4')
+            sp.address('KT1Tnz7FTAhNjn8db1xzi6vg43fgjdmgamoK'),
+            sp.address('tz1WM1wDM4mdtD3qMiELJSgbB14ZryyHNu7P')
         )
     )
