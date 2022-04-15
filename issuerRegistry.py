@@ -27,6 +27,9 @@ class IssuerRegistry(sp.Contract):
 
     @sp.entry_point
     def add(self, parameters):
+        # Verifying whether the calller address is our Registry contract
+        sp.verify(self.data.logic_contract_address == sp.sender, message = "Incorrect caller")
+
         self.data.issuer_map[parameters.issuer_did] = parameters
 
     @sp.entry_point
@@ -34,10 +37,28 @@ class IssuerRegistry(sp.Contract):
         sp.set_type(parameters.issuer_did, sp.TString)
         sp.set_type(parameters.status, sp.TNat)
 
+        # Verifying whether the calller address is our Registry contract
+        sp.verify(self.data.logic_contract_address == sp.sender, message = "Incorrect caller")
+
         issuer_data = self.data.issuer_map[parameters.issuer_did]
         
         with sp.modify_record(issuer_data, "data") as data:
             data.status = parameters.status
+
+        self.data.issuer_map[parameters.issuer_did] = issuer_data
+
+    @sp.entry_point
+    def change_owner(self, parameters):
+        sp.set_type(parameters.issuer_did, sp.TString)
+        sp.set_type(parameters.new_owner_address, sp.TAddress)
+
+        # Verifying whether the calller address is our Registry contract
+        sp.verify(self.data.logic_contract_address == sp.sender, message = "Incorrect caller")
+
+        issuer_data = self.data.issuer_map[parameters.issuer_did]
+        
+        with sp.modify_record(issuer_data, "data") as data:
+            data.issuer_owner = parameters.new_owner_address
 
         self.data.issuer_map[parameters.issuer_did] = issuer_data
     

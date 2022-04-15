@@ -35,7 +35,10 @@ class RegistryLogic(sp.Contract):
             certifier = certifier
         )
     
-    #Helpers
+    ###########
+    # Helpers #
+    ###########
+    
     def get_contract_address(self, contract_name):
         return self.data.contracts[contract_name]
 
@@ -53,6 +56,18 @@ class RegistryLogic(sp.Contract):
             sp.result(True)
         sp.else:
             sp.if ((sp.source == params.owner_address) & (params.current_status != 3) & (params.new_status != 3)):
+                sp.result(True)
+            sp.else:
+                sp.result(False)
+
+    @sp.private_lambda(with_storage="read-only")
+    def verify_issuer_owner_change_allowed(self, params):
+        sp.set_type(params.owner_address, sp.TAddress)
+
+        sp.if (sp.source == self.data.certifier) :
+            sp.result(True)
+        sp.else:
+            sp.if (sp.source == params.owner_address):
                 sp.result(True)
             sp.else:
                 sp.result(False)
@@ -275,16 +290,14 @@ class RegistryLogic(sp.Contract):
         owner_address = self.get_issuer_owner_address(parameters.issuer_did)
         current_issuer_status = self.get_issuer_status(parameters.issuer_did)
 
-        test = self.verify_issuer_status_change_allowed(
+        sp.verify(self.verify_issuer_status_change_allowed(
             sp.record(
                 owner_address = owner_address,
                 current_status = current_issuer_status,
                 new_status = parameters.status
             )
-        )
+        ), message = "Status change not allowed")
         
-        sp.verify(test, message = "Status change not allowed")
-
         contract_data = sp.TRecord(issuer_did = sp.TString, status = sp.TNat)
         logic_contract = sp.contract(contract_data, self.get_contract_address('issuer_registry_contract'), "change_status").open_some()
 
@@ -293,6 +306,28 @@ class RegistryLogic(sp.Contract):
         params = sp.record(
             issuer_did = parameters.issuer_did,
             status = parameters.status
+        )
+
+        sp.transfer(params, sp.mutez(0), logic_contract)
+
+    @sp.entry_point
+    def set_issuer_owner(self, parameters):
+        sp.set_type(parameters.issuer_did, sp.TString)
+        sp.set_type(parameters.new_owner_address, sp.TAddress)
+
+        owner_address = self.get_issuer_owner_address(parameters.issuer_did)
+        sp.verify(self.verify_issuer_owner_change_allowed(
+            sp.record(
+                owner_address = owner_address,
+            )
+        ), message = "Cannot be called from non-certified addresses")
+
+        contract_data = sp.TRecord(issuer_did = sp.TString, new_owner_address = sp.TAddress)
+        logic_contract = sp.contract(contract_data, self.get_contract_address('issuer_registry_contract'), "change_status").open_some()
+
+        params = sp.record(
+            issuer_did = parameters.issuer_did,
+            new_owner_address = parameters.new_owner_address
         )
 
         sp.transfer(params, sp.mutez(0), logic_contract)
