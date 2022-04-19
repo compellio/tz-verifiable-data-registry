@@ -177,6 +177,21 @@ class Registry(sp.Contract):
 
         sp.transfer(params, sp.mutez(0), logic_contract)
 
+    @sp.entry_point
+    def bind_issuer_schema(self, issuer_did, schema_id):
+        sp.set_type(issuer_did, sp.TString)
+        sp.set_type(schema_id, sp.TNat)
+
+        contract_data = sp.TRecord(issuer_did = sp.TString, schema_id = sp.TNat)
+        logic_contract = sp.contract(contract_data, self.data.logic_contract, "bind_issuer_schema").open_some()
+
+        params = sp.record(
+            issuer_did = issuer_did,
+            schema_id = schema_id
+        )
+
+        sp.transfer(params, sp.mutez(0), logic_contract)
+
     @sp.onchain_view()
     def get_issuer(self, issuer_did):
         # Defining the parameters' types

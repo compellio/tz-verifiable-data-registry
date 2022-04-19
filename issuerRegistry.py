@@ -27,7 +27,7 @@ class IssuerRegistry(sp.Contract):
 
     @sp.entry_point
     def add(self, parameters):
-        # Verifying whether the calller address is our Registry contract
+        # Verifying whether the caller address is our Registry contract
         sp.verify(self.data.logic_contract_address == sp.sender, message = "Incorrect caller")
 
         self.data.issuer_map[parameters.issuer_did] = parameters
@@ -37,7 +37,7 @@ class IssuerRegistry(sp.Contract):
         sp.set_type(parameters.issuer_did, sp.TString)
         sp.set_type(parameters.status, sp.TNat)
 
-        # Verifying whether the calller address is our Registry contract
+        # Verifying whether the caller address is our Registry contract
         sp.verify(self.data.logic_contract_address == sp.sender, message = "Incorrect caller")
 
         issuer_data = self.data.issuer_map[parameters.issuer_did]
@@ -52,7 +52,7 @@ class IssuerRegistry(sp.Contract):
         sp.set_type(parameters.issuer_did, sp.TString)
         sp.set_type(parameters.new_owner_address, sp.TAddress)
 
-        # Verifying whether the calller address is our Registry contract
+        # Verifying whether the caller address is our Registry contract
         sp.verify(self.data.logic_contract_address == sp.sender, message = "Incorrect caller")
 
         issuer_data = self.data.issuer_map[parameters.issuer_did]
@@ -73,6 +73,10 @@ class IssuerRegistry(sp.Contract):
     @sp.onchain_view()
     def get_issuer_status(self, issuer_did):
         sp.result(self.data.issuer_map[issuer_did].status)
+
+    @sp.onchain_view()
+    def issuer_exists(self, issuer_did):
+        sp.result(self.data.issuer_map.contains(issuer_did))
 
     @sp.entry_point
     def change_logic_contract_address(self, new_logic_contract_address):
@@ -114,7 +118,7 @@ def test():
 
     sp.add_compilation_target("issuerRegistry",
         IssuerRegistry(
-            sp.address('KT1HP6Nb4WWPEt4VPVFYUpghLb6zjexEx5J3'),
+            sp.address('KT1MWPUKoU4FUVr1nBA4cwjMSoSsxqE3x9kc'),
             sp.address('tz1WM1wDM4mdtD3qMiELJSgbB14ZryyHNu7P')
         )
     )

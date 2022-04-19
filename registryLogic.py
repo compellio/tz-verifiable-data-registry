@@ -46,6 +46,16 @@ class RegistryLogic(sp.Contract):
         sp.set_type(owner, sp.TAddress)
         return owner == sp.source
 
+    def get_schema_owner_address(self, schema_id):
+        schema_owner_address = sp.view(
+            "get_schema_owner_address",
+            self.get_contract_address('schema_registry_contract'),
+            schema_id,
+            t = sp.TAddress
+        ).open_some("Invalid view");
+
+        return schema_owner_address
+
     @sp.private_lambda(with_storage="read-only")
     def verify_issuer_status_change_allowed(self, params):
         sp.set_type(params.owner_address, sp.TAddress)
@@ -71,6 +81,36 @@ class RegistryLogic(sp.Contract):
                 sp.result(True)
             sp.else:
                 sp.result(False)
+
+    def get_issuer_owner_address(self, issuer_did):
+        issuer_owner_address = sp.view(
+            "get_issuer_owner_address",
+            self.get_contract_address('issuer_registry_contract'),
+            issuer_did,
+            t = sp.TAddress
+        ).open_some("Invalid view");
+
+        return issuer_owner_address
+
+    def get_issuer_status(self, issuer_did):
+        issuer_status = sp.view(
+            "get_issuer_status",
+            self.get_contract_address('issuer_registry_contract'),
+            issuer_did,
+            t = sp.TNat
+        ).open_some("Invalid view");
+
+        return issuer_status
+
+    def check_issuer_exists(self, issuer_did):
+        issuer_existance = sp.view(
+            "issuer_exists",
+            self.get_contract_address('issuer_registry_contract'),
+            issuer_did,
+            t = sp.TBool
+        ).open_some("Invalid view");
+
+        return issuer_existance
             
     @sp.entry_point
     def update_contract_address(self, parameters):
@@ -79,16 +119,6 @@ class RegistryLogic(sp.Contract):
 
         sp.verify(self.data.certifier == sp.source, message = "Incorrect certifier")
         self.data.contracts[parameters.contract_name] = parameters.address
-
-    def get_schema_owner_address(self, schema_id):
-        schema_owner_address = sp.view(
-            "get_schema_owner_address",
-            self.get_contract_address('schema_registry_contract'),
-            schema_id,
-            t = sp.TAddress
-        ).open_some("Invalid view");
-
-        return schema_owner_address
 
     @sp.entry_point
     def add_schema(self, parameters):
@@ -188,26 +218,6 @@ class RegistryLogic(sp.Contract):
         )
 
         sp.result(result_schema)
-
-    def get_issuer_owner_address(self, issuer_did):
-        issuer_owner_address = sp.view(
-            "get_issuer_owner_address",
-            self.get_contract_address('issuer_registry_contract'),
-            issuer_did,
-            t = sp.TAddress
-        ).open_some("Invalid view");
-
-        return issuer_owner_address
-
-    def get_issuer_status(self, issuer_did):
-        issuer_status = sp.view(
-            "get_issuer_status",
-            self.get_contract_address('issuer_registry_contract'),
-            issuer_did,
-            t = sp.TNat
-        ).open_some("Invalid view");
-
-        return issuer_status
 
     @sp.entry_point
     def add_issuer(self, parameters):
@@ -328,6 +338,29 @@ class RegistryLogic(sp.Contract):
         params = sp.record(
             issuer_did = parameters.issuer_did,
             new_owner_address = parameters.new_owner_address
+        )
+
+        sp.transfer(params, sp.mutez(0), logic_contract)
+
+    @sp.entry_point
+    def bind_issuer_schema(self, parameters):
+        sp.set_type(parameters.issuer_did, sp.TString)
+        sp.set_type(parameters.schema_id, sp.TNat)
+        
+        sp.verify(self.check_issuer_exists(parameters.issuer_did), message = "Issuer did does not exist")
+        
+        owner_address = self.get_issuer_owner_address(parameters.issuer_did)
+        sp.verify(self.verify_owner_source_address(owner_address), message = "Binding not allowed")
+
+        contract_data = sp.TRecord(issuer_did = sp.TString, schema_binding = sp.TRecord( schema_id = sp.TNat, status = sp.TNat ))
+        logic_contract = sp.contract(contract_data, self.get_contract_address('schema_registry_contract'), "bind_issuer_schema").open_some()
+
+        params = sp.record(
+            issuer_did = parameters.issuer_did,
+            schema_binding = sp.record(
+                schema_id = parameters.schema_id,
+                status = 1
+            )
         )
 
         sp.transfer(params, sp.mutez(0), logic_contract)
