@@ -38,6 +38,12 @@ The use case for which the client submits their schema to the blockchain.
 { "type": "https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json", "modelVersion": "1.0", "id": "did:work:MDP8AsFhHzhwUvGNuYkX7T;id=06e126d1-fa44-4882-a243-1e326fbe21db;version=1.0", "name": "EmailCredentialSchema", "author": "did:work:MDP8AsFhHzhwUvGNuYkX7T", "authored": "2018-01-01T00:00:00+00:00", "schema": { "$schema": "http://json-schema.org/draft-07/schema#", "description": "Email", "type": "object", "properties": { "emailAddress": { "type": "string", "format": "email" } }, "required": ["emailAddress"], "additionalProperties": false }, "proof": { "created": "2019-09-27T06:26:11Z", "creator": "did:work:MDP8AsFhHzhwUvGNuYkX7T#key-1", "nonce": "0efba23d-2987-4441-998e-23a9d9af79f0", "signatureValue": "2A7ZF9f9TWMdtgn57Y6dP6RQGs52xg2QdjUESZUuf4J9BUnwwWFNL8vFshQAEQF6ZFBXjYLYNU4hzXNKc3R6y6re", "type": "Ed25519VerificationKey2018" } }
 ```
 
+In case of using direct input, you should manually escape characters, so the above JSON should have the following form:
+
+```
+'{\"type\":\"https:\/\/w3c-ccg.github.io\/vc-json-schemas\/schema\/1.0\/schema.json\",\"modelVersion\":\"1.0\",\"id\":\"did:work:MDP8AsFhHzhwUvGNuYkX7T;id=06e126d1-fa44-4882-a243-1e326fbe21db;version=1.0\",\"name\":\"EmailCredentialSchema\",\"author\":\"did:work:MDP8AsFhHzhwUvGNuYkX7T\",\"authored\":\"2018-01-01T00:00:00+00:00\",\"schema\":{\"$schema\":\"http:\/\/json-schema.org\/draft-07\/schema#\",\"description\":\"Email\",\"type\":\"object\",\"properties\":{\"emailAddress\":{\"type\":\"string\",\"format\":\"email\"}},\"required\":[\"emailAddress\"],\"additionalProperties\":false},\"proof\":{\"created\":\"2019-09-27T06:26:11Z\",\"creator\":\"did:work:MDP8AsFhHzhwUvGNuYkX7T#key-1\",\"nonce\":\"0efba23d-2987-4441-998e-23a9d9af79f0\",\"signatureValue\":\"2A7ZF9f9TWMdtgn57Y6dP6RQGs52xg2QdjUESZUuf4J9BUnwwWFNL8vFshQAEQF6ZFBXjYLYNU4hzXNKc3R6y6re\",\"type\":\"Ed25519VerificationKey2018\"}}'
+```
+
 ### Get Schema
 
 The use case for which the client retrieves a schema from the blockchain
@@ -62,6 +68,12 @@ did:tz:tz1zsSgDXeYPhZ3AuKhTFneDf1
 
 ```
 { "@context": "https://w3id.org/did/v1", "id": "did:tz:tz1zsSgDXeYPhZ3AuKhTFneDf1", "verificationMethod": [ { "id": "did:tz:tz1zsSgDXeYPhZ3AuKhTFneDf1", "type": "EcdsaSecp256k1VerificationKey2019", "controller": "did:tz:tz1zsSgDXeYPhZ3AuKhTFneDf1", "publicKeyJwk": { "kty": "EC", "crv": "secp256k1", "x": "n03trG-1sWidluyYQ2gcKrgYE94rMkLIArZCHjv2GpI", "y": "6__x_vqe0nBGYf7azbQ1_VvvuCafG5MhhUPNvYp-Mak" } } ], "authentication": [ "did:tz:tz1zsSgDXeYPhZ3AuKhTFneDf1" ], "assertionMethod": [ "did:tz:tz1zsSgDXeYPhZ3AuKhTFneDf1" ] }
+```
+
+In case of using direct input, you should manually escape characters, so the above JSON should have the following form:
+
+```
+'{\"@context\":\"https:\/\/w3id.org\/did\/v1\",\"id\":\"did:tz:tz1zsSgDXeYPhZ3AuKhTFneDf1\",\"verificationMethod\":[{\"id\":\"did:tz:tz1zsSgDXeYPhZ3AuKhTFneDf1\",\"type\":\"EcdsaSecp256k1VerificationKey2019\",\"controller\":\"did:tz:tz1zsSgDXeYPhZ3AuKhTFneDf1\",\"publicKeyJwk\":{\"kty\":\"EC\",\"crv\":\"secp256k1\",\"x\":\"n03trG-1sWidluyYQ2gcKrgYE94rMkLIArZCHjv2GpI\",\"y\":\"6__x_vqe0nBGYf7azbQ1_VvvuCafG5MhhUPNvYp-Mak\"}}],\"authentication\":[\"did:tz:tz1zsSgDXeYPhZ3AuKhTFneDf1\"],\"assertionMethod\":[\"did:tz:tz1zsSgDXeYPhZ3AuKhTFneDf1\"]}'
 ```
  
 ### Get Issuer
