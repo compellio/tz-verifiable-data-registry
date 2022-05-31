@@ -1,10 +1,10 @@
 # Tezos Verifiable Data Registry
 
-The future of the Verifiable Data Registry smart contract on tezos.
+A collection of contracts implementing a Registry for [Verifiable Data Schemas](https://www.w3.org/TR/vc-data-model/#data-schemas) as described by W3C.
 
 ### Instalation
 
-You will need to have a **Wallet** on an existing Tezos Testnet. We have used **Hangzhounet** for our tests.
+You will need to have a **Wallet** on an existing Tezos Testnet. We have used **Ithacanet** for our tests.
 
 At the current stage of development, the interaction is done directly through the **registryLogic** contract. At a later stage, all interactions will be done through the **registry** Lambda contract. This is to simplify the configuration for testing purposes.
 

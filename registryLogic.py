@@ -186,7 +186,7 @@ class RegistryLogic(sp.Contract):
         contract_data = sp.TRecord(schema_id = sp.TNat, status = sp.TNat)
         logic_contract = sp.contract(contract_data, self.get_contract_address('schema_registry_contract'), "change_status").open_some()
 
-        # TO DO Add check if status exists
+        sp.verify(self.data.schema_statuses.contains(parameters.status), message = "Incorrect status")
 
         params = sp.record(
             schema_id = parameters.schema_id,
@@ -311,7 +311,7 @@ class RegistryLogic(sp.Contract):
         contract_data = sp.TRecord(issuer_did = sp.TString, status = sp.TNat)
         logic_contract = sp.contract(contract_data, self.get_contract_address('issuer_registry_contract'), "change_status").open_some()
 
-        # TO DO Add check if status exists
+        sp.verify(self.data.issuer_statuses.contains(parameters.status), message = "Incorrect status")
 
         params = sp.record(
             issuer_did = parameters.issuer_did,
