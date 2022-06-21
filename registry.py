@@ -121,6 +121,29 @@ class Registry(sp.Contract):
         # Calling the Storage contract with the parameters we defined
         sp.transfer(params, sp.mutez(0), logic_contract)
 
+
+    @sp.entry_point
+    def set_issuer_data(self, issuer_did, issuer_data):
+        # Defining the parameters' types
+        sp.set_type(issuer_did, sp.TString)
+        sp.set_type(issuer_data, sp.TString)
+
+        # Defining the data that we expect as a return from the Logic contract
+        contract_data = sp.TRecord(issuer_did=sp.TString, issuer_data=sp.TString)
+
+        # Defining the Logic contract itself and its entry point for the call
+        logic_contract = sp.contract(contract_data, self.data.logic_contract, "set_issuer_data").open_some()
+
+        # Defining the parameters that will be passed to the Storage contract
+        params = sp.record(
+            issuer_did=issuer_did,
+            issuer_data=issuer_data
+        )
+
+        # Calling the Storage contract with the parameters we defined
+        sp.transfer(params, sp.mutez(0), logic_contract)
+
+
     @sp.entry_point
     def set_issuer_active(self, issuer_did):
         sp.set_type(issuer_did, sp.TString)
