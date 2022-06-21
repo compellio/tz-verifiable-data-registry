@@ -42,9 +42,18 @@ class RegistryLogic(sp.Contract):
     def get_contract_address(self, contract_name):
         return self.data.contracts[contract_name]
 
-    def verify_owner_source_address(self, owner):
-        sp.set_type(owner, sp.TAddress)
-        return owner == sp.source
+    @sp.private_lambda(with_storage="read-only")
+    def verify_owner_source_address(self, params):
+        sp.set_type(params.owner_address, sp.TAddress)
+
+        sp.if (sp.source == self.data.certifier):
+            sp.result(True)
+        sp.else:
+            sp.if (sp.source == params.owner_address):
+                sp.result(True)
+            sp.else:
+                sp.result(False)
+
 
     def get_schema_owner_address(self, schema_id):
         schema_owner_address = sp.view(
@@ -71,7 +80,7 @@ class RegistryLogic(sp.Contract):
                 sp.result(False)
 
     @sp.private_lambda(with_storage="read-only")
-    def verify_issuer_owner_change_allowed(self, params):
+    def verify_issuer_update_allowed(self, params):
         sp.set_type(params.owner_address, sp.TAddress)
 
         sp.if (sp.source == self.data.certifier) :
@@ -146,7 +155,11 @@ class RegistryLogic(sp.Contract):
         sp.set_type(parameters.schema_id, sp.TNat)
 
         owner_address = self.get_schema_owner_address(parameters.schema_id)
-        sp.verify(self.verify_owner_source_address(owner_address), message = "Incorrect owner")
+        sp.verify(self.verify_owner_source_address(
+            sp.record(
+                owner_address = owner_address,
+            )
+        ), message = "Incorrect owner")
 
         contract_data = sp.TRecord(schema_id = sp.TNat, status = sp.TNat)
         logic_contract = sp.contract(contract_data, self.get_contract_address('schema_registry_contract'), "change_status").open_some()
@@ -163,7 +176,11 @@ class RegistryLogic(sp.Contract):
         sp.set_type(parameters.schema_id, sp.TNat)
 
         owner_address = self.get_schema_owner_address(parameters.schema_id)
-        sp.verify(self.verify_owner_source_address(owner_address), message = "Incorrect owner")
+        sp.verify(self.verify_owner_source_address(
+            sp.record(
+                owner_address = owner_address,
+            )
+        ), message = "Incorrect owner")
 
         contract_data = sp.TRecord(schema_id = sp.TNat, status = sp.TNat)
         logic_contract = sp.contract(contract_data, self.get_contract_address('schema_registry_contract'), "change_status").open_some()
@@ -181,7 +198,11 @@ class RegistryLogic(sp.Contract):
         sp.set_type(parameters.status, sp.TNat)
 
         owner_address = self.get_schema_owner_address(parameters.schema_id)
-        sp.verify(self.verify_owner_source_address(owner_address), message = "Incorrect owner")
+        sp.verify(self.verify_owner_source_address(
+            sp.record(
+                owner_address = owner_address,
+            )
+        ), message = "Incorrect owner")
 
         contract_data = sp.TRecord(schema_id = sp.TNat, status = sp.TNat)
         logic_contract = sp.contract(contract_data, self.get_contract_address('schema_registry_contract'), "change_status").open_some()
@@ -225,12 +246,52 @@ class RegistryLogic(sp.Contract):
         sp.set_type(parameters.issuer_did, sp.TString)
         sp.set_type(parameters.issuer_data, sp.TString)
 
+        # Check if issuer does not exist, does not allow add call otherwise
+        # This is to avoid update from unauthorized
+        sp.verify(~self.check_issuer_exists(parameters.issuer_did), message = "Issuer did already exists")
+
         # Defining the data that we expect as a return from the Logic contract
         contract_data = sp.TRecord(issuer_did = sp.TString, issuer_data = sp.TString, issuer_owner = sp.TAddress, status = sp.TNat)
 
         # Defining the Logic contract itself and its entry point for the call
         logic_contract = sp.contract(contract_data, self.get_contract_address('issuer_registry_contract'), "add").open_some()
         
+        # Defining the parameters that will be passed to the Storage contract
+        params = sp.record(
+            issuer_did = parameters.issuer_did,
+            issuer_data = parameters.issuer_data,
+            issuer_owner = sp.source,
+            status = 1
+        )
+
+        # Calling the Storage contract with the parameters we defined
+        sp.transfer(params, sp.mutez(0), logic_contract)
+
+
+    @sp.entry_point
+    def set_issuer_data(self, parameters):
+        # Defining the parameters' types
+        sp.set_type(parameters.issuer_did, sp.TString)
+        sp.set_type(parameters.issuer_data, sp.TString)
+
+        # Check if issuer exists, does not allow call otherwise
+        sp.verify(self.check_issuer_exists(parameters.issuer_did), message = "Issuer did does not exist")
+
+        #update is allowed only from owner
+        owner_address = self.get_issuer_owner_address(parameters.issuer_did)
+        sp.verify(self.verify_issuer_update_allowed(
+            sp.record(
+                owner_address = owner_address,
+            )
+        ), message = "Cannot be called from non-certified addresses")
+
+        # Defining the data that we expect as a return from the Logic contract
+        contract_data = sp.TRecord(issuer_did = sp.TString, issuer_data = sp.TString, issuer_owner = sp.TAddress, status = sp.TNat)
+
+        # Defining the Logic contract itself and its entry point for the call
+        logic_contract = sp.contract(contract_data, self.get_contract_address('issuer_registry_contract'),
+                                     "add").open_some()
+
         # Defining the parameters that will be passed to the Storage contract
         params = sp.record(
             issuer_did = parameters.issuer_did,
@@ -326,7 +387,7 @@ class RegistryLogic(sp.Contract):
         sp.set_type(parameters.new_owner_address, sp.TAddress)
 
         owner_address = self.get_issuer_owner_address(parameters.issuer_did)
-        sp.verify(self.verify_issuer_owner_change_allowed(
+        sp.verify(self.verify_issuer_update_allowed(
             sp.record(
                 owner_address = owner_address,
             )
@@ -350,7 +411,11 @@ class RegistryLogic(sp.Contract):
         sp.verify(self.check_issuer_exists(parameters.issuer_did), message = "Issuer did does not exist")
         
         owner_address = self.get_issuer_owner_address(parameters.issuer_did)
-        sp.verify(self.verify_owner_source_address(owner_address), message = "Binding not allowed")
+        sp.verify(self.verify_owner_source_address(
+            sp.record(
+                owner_address=owner_address,
+            )
+        ), message = "Binding not allowed")
 
         contract_data = sp.TRecord(issuer_did = sp.TString, schema_binding = sp.TRecord( schema_id = sp.TNat, status = sp.TNat ))
         logic_contract = sp.contract(contract_data, self.get_contract_address('schema_registry_contract'), "bind_issuer_schema").open_some()
@@ -395,6 +460,6 @@ def test():
 
     sp.add_compilation_target("registryLogic",
         RegistryLogic(
-            sp.address('tz1WM1wDM4mdtD3qMiELJSgbB14ZryyHNu7P')
+            sp.address('tz1ZrecJHwQriTBiSjSzLqUnepzyJuYokt5D')
         )
     )
