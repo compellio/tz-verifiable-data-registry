@@ -178,7 +178,7 @@ class RegistryLogic(sp.Contract):
         owner_address = self.get_schema_owner_address(parameters.schema_id)
         sp.verify(self.verify_owner_source_address(
             sp.record(
-                owner_address=owner_address,
+                owner_address = owner_address,
             )
         ), message = "Incorrect owner")
 
@@ -200,7 +200,7 @@ class RegistryLogic(sp.Contract):
         owner_address = self.get_schema_owner_address(parameters.schema_id)
         sp.verify(self.verify_owner_source_address(
             sp.record(
-                owner_address=owner_address,
+                owner_address = owner_address,
             )
         ), message = "Incorrect owner")
 
