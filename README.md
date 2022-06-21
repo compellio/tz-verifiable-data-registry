@@ -8,12 +8,15 @@ You will need to have a **Wallet** on an existing Tezos Testnet. We have used **
 
 At the current stage of development, the interaction is done directly through the **registryLogic** contract. At a later stage, all interactions will be done through the **registry** Lambda contract. This is to simplify the configuration for testing purposes.
 
-1. In the **registryLogic** contract, define the first parameter of **sp.add_compilation_target**, **RegistryLogic** as the address of your **Wallet**.
+1. In the **registryLogic** contract, define the first parameter of **sp.add_compilation_target**, define the first parameter of **sp.add_compilation_target**, **Registry** as the address of your originated **registryLogic** contract.
 2. Compile and Originate the **registryLogic** contract.
-3. In the **Storage** contracts (**issuerRegistry** and **schemaRegistry**), define the first parameter of **sp.add_compilation_target**, **IssuerRegistry** and **SchemaRegistry** as the address of your originated **registryLogic** contract.
-4. In the **Storage** contracts (**issuerRegistry** and **schemaRegistry**), define the second parameter of **sp.add_compilation_target**, **IssuerRegistry** and **SchemaRegistry** as the address of your **Wallet**.
-5. Compile and Originate the **Storage** contracts
-6. Open the **registryLogic** contract in https://better-call.dev/ and interact with the **update_contract_address** entry point, setting the following pairs:
+3. In the **registry** (lambda) contract, define the second parameter of **sp.add_compilation_target**, **Registry** as the address of your originated **registryLogic** contract.
+3. In the **registry** (lambda) contract, define the second parameter of **sp.add_compilation_target**, **Registry** as the address of your **Wallet**.
+2. Compile and Originate the **registry** contract.
+4. In the **Storage** contracts (**issuerRegistry** and **schemaRegistry**), define the first parameter of **sp.add_compilation_target**, **IssuerRegistry** and **SchemaRegistry** as the address of your originated **registryLogic** contract.
+5. In the **Storage** contracts (**issuerRegistry** and **schemaRegistry**), define the second parameter of **sp.add_compilation_target**, **IssuerRegistry** and **SchemaRegistry** as the address of your **Wallet**.
+6. Compile and Originate the **Storage** contracts
+7. Open the **registryLogic** contract in https://better-call.dev/ and interact with the **update_contract_address** entry point, setting the following pairs:
    - `issuer_registry_contract` - **issuerRegistry** contract address
    - `schema_registry_contract` - **schemaRegistry** contract address
 
