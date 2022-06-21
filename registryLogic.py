@@ -248,7 +248,7 @@ class RegistryLogic(sp.Contract):
 
         # Check if issuer does not exist, does not allow add call otherwise
         # This is to avoid update from unauthorized
-        sp.verify(~self.check_issuer_exists(parameters.issuer_did), message="Issuer did already exists")
+        sp.verify(~self.check_issuer_exists(parameters.issuer_did), message = "Issuer did already exists")
 
         # Defining the data that we expect as a return from the Logic contract
         contract_data = sp.TRecord(issuer_did = sp.TString, issuer_data = sp.TString, issuer_owner = sp.TAddress, status = sp.TNat)
@@ -275,7 +275,7 @@ class RegistryLogic(sp.Contract):
         sp.set_type(parameters.issuer_data, sp.TString)
 
         # Check if issuer exists, does not allow call otherwise
-        sp.verify(self.check_issuer_exists(parameters.issuer_did), message="Issuer did does not exist")
+        sp.verify(self.check_issuer_exists(parameters.issuer_did), message = "Issuer did does not exist")
 
         #update is allowed only from owner
         owner_address = self.get_issuer_owner_address(parameters.issuer_did)
@@ -286,7 +286,7 @@ class RegistryLogic(sp.Contract):
         ), message = "Cannot be called from non-certified addresses")
 
         # Defining the data that we expect as a return from the Logic contract
-        contract_data = sp.TRecord(issuer_did=sp.TString, issuer_data=sp.TString, issuer_owner=sp.TAddress, status=sp.TNat)
+        contract_data = sp.TRecord(issuer_did = sp.TString, issuer_data = sp.TString, issuer_owner = sp.TAddress, status = sp.TNat)
 
         # Defining the Logic contract itself and its entry point for the call
         logic_contract = sp.contract(contract_data, self.get_contract_address('issuer_registry_contract'),
@@ -294,10 +294,10 @@ class RegistryLogic(sp.Contract):
 
         # Defining the parameters that will be passed to the Storage contract
         params = sp.record(
-            issuer_did=parameters.issuer_did,
-            issuer_data=parameters.issuer_data,
-            issuer_owner=sp.source,
-            status=1
+            issuer_did = parameters.issuer_did,
+            issuer_data = parameters.issuer_data,
+            issuer_owner = sp.source,
+            status = 1
         )
 
         # Calling the Storage contract with the parameters we defined
