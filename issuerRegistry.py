@@ -87,35 +87,6 @@ class IssuerRegistry(sp.Contract):
 
 @sp.add_test(name = "IssuerRegistry")
 def test():
-    scenario = sp.test_scenario()
-
-    logic_address = sp.address('KT1KsrohW6ZZ1Uj2BjzvBcmKDwx8AS3GY2A3')
-    wallet_address = sp.test_account("Valid").address
-    nonvalid_address = sp.test_account("NonValid").address
-
-    test_add = sp.record(
-        issuer_did = "did:tz:test_did",
-        issuer_data = "data",
-        issuer_owner = sp.address('tz1WM1wDM4mdtD3qMiELJSgbB14ZryyHNu7P'),
-        status = 1
-    )
-
-    test_status = sp.record(
-        issuer_did = "did:tz:test_did",
-        status = 2
-    )
-
-    c1 = IssuerRegistry(
-        logic_address,
-        wallet_address
-    )
-
-    scenario += c1
-
-    c1.add(test_add).run(valid = True, sender = wallet_address)
-    scenario.verify(c1.get("did:tz:test_did").issuer_data == "data")
-    c1.change_status(test_status).run(valid = True, sender = wallet_address)
-
     sp.add_compilation_target("issuerRegistry",
         IssuerRegistry(
             sp.address('KT1MWPUKoU4FUVr1nBA4cwjMSoSsxqE3x9kc'),
