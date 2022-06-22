@@ -84,34 +84,6 @@ class SchemaRegistry(sp.Contract):
 
 @sp.add_test(name = "SchemaRegistry")
 def test():
-    scenario = sp.test_scenario()
-
-    logic_address = sp.address('KT1KsrohW6ZZ1Uj2BjzvBcmKDwx8AS3GY2A3')
-    wallet_address = sp.test_account("Valid").address
-    nonvalid_address = sp.test_account("NonValid").address
-
-    test_add = sp.record(
-        schema_data = "data",
-        schema_owner = sp.address('tz1WM1wDM4mdtD3qMiELJSgbB14ZryyHNu7P'),
-        status = 1
-    )
-
-    test_status = sp.record(
-        schema_id = 0,
-        status = 2
-    )
-
-    c1 = SchemaRegistry(
-        logic_address,
-        wallet_address
-    )
-
-    scenario += c1
-
-    # c1.add(test_add).run(valid = True, sender = wallet_address)
-    # scenario.verify(c1.get(0).schema_data == "data")
-    # c1.change_status(test_status).run(valid = True, sender = wallet_address)
-
     sp.add_compilation_target("schemaRegistry",
         SchemaRegistry(
             sp.address('KT1MWPUKoU4FUVr1nBA4cwjMSoSsxqE3x9kc'),
