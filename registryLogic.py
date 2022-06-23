@@ -394,38 +394,11 @@ class RegistryLogic(sp.Contract):
         ), message = "Cannot be called from non-certified addresses")
 
         contract_data = sp.TRecord(issuer_did = sp.TString, new_owner_address = sp.TAddress)
-        logic_contract = sp.contract(contract_data, self.get_contract_address('issuer_registry_contract'), "change_status").open_some()
+        logic_contract = sp.contract(contract_data, self.get_contract_address('issuer_registry_contract'), "change_owner").open_some()
 
         params = sp.record(
             issuer_did = parameters.issuer_did,
             new_owner_address = parameters.new_owner_address
-        )
-
-        sp.transfer(params, sp.mutez(0), logic_contract)
-
-    @sp.entry_point
-    def bind_issuer_schema(self, parameters):
-        sp.set_type(parameters.issuer_did, sp.TString)
-        sp.set_type(parameters.schema_id, sp.TNat)
-        
-        sp.verify(self.check_issuer_exists(parameters.issuer_did), message = "Issuer did does not exist")
-        
-        owner_address = self.get_issuer_owner_address(parameters.issuer_did)
-        sp.verify(self.verify_owner_source_address(
-            sp.record(
-                owner_address=owner_address,
-            )
-        ), message = "Binding not allowed")
-
-        contract_data = sp.TRecord(issuer_did = sp.TString, schema_binding = sp.TRecord( schema_id = sp.TNat, status = sp.TNat ))
-        logic_contract = sp.contract(contract_data, self.get_contract_address('schema_registry_contract'), "bind_issuer_schema").open_some()
-
-        params = sp.record(
-            issuer_did = parameters.issuer_did,
-            schema_binding = sp.record(
-                schema_id = parameters.schema_id,
-                status = 1
-            )
         )
 
         sp.transfer(params, sp.mutez(0), logic_contract)
@@ -455,9 +428,61 @@ class RegistryLogic(sp.Contract):
 
         sp.result(result_issuer)
 
+    @sp.entry_point
+    def bind_issuer_schema(self, parameters):
+        sp.set_type(parameters.issuer_did, sp.TString)
+        sp.set_type(parameters.schema_id, sp.TNat)
+        
+        sp.verify(self.check_issuer_exists(parameters.issuer_did), message = "Issuer did does not exist")
+        
+        owner_address = self.get_issuer_owner_address(parameters.issuer_did)
+        sp.verify(self.verify_owner_source_address(
+            sp.record(
+                owner_address=owner_address,
+            )
+        ), message = "Binding not allowed")
+
+        contract_data = sp.TRecord(issuer_did = sp.TString, schema_binding = sp.TRecord( schema_id = sp.TNat, status = sp.TNat ))
+        logic_contract = sp.contract(contract_data, self.get_contract_address('schema_registry_contract'), "bind_issuer_schema").open_some()
+
+        params = sp.record(
+            issuer_did = parameters.issuer_did,
+            schema_binding = sp.record(
+                schema_id = parameters.schema_id,
+                status = 1
+            )
+        )
+
+        sp.transfer(params, sp.mutez(0), logic_contract)
+
+    @sp.onchain_view()
+    def verify_issuer_schema_binding(self, parameters):
+        # Defining the parameters' types
+        sp.set_type(parameters.issuer_did, sp.TString)
+        sp.set_type(parameters.schema_id, sp.TNat)
+
+        issuer_did = parameters.issuer_did
+        schema_id = parameters.schema_id
+        binding_record = sp.record(
+            issuer_did = issuer_did,
+            schema_id = schema_id
+        )
+
+        # Defining the parameters' types
+        binding_result = sp.view(
+            "verify_issuer_schema_binding",
+            self.get_contract_address('schema_registry_contract'),
+            binding_record,
+            t = sp.TRecord(
+                binding_exists = sp.TBool,
+                status = sp.TNat
+            )
+        ).open_some("Invalid view");
+
+        sp.result(binding_result)
+
 @sp.add_test(name = "RegistryLogic")
 def test():
-
     sp.add_compilation_target("registryLogic",
         RegistryLogic(
             sp.address('tz1ZrecJHwQriTBiSjSzLqUnepzyJuYokt5D')

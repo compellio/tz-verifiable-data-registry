@@ -16,9 +16,9 @@ class SchemaRegistry(sp.Contract):
                 ),
                 issuer_schema_map = sp.TBigMap(
                     sp.TString,
-                    sp.TRecord(
-                        schema_id = sp.TNat,
-                        status = sp.TNat
+                    sp.TMap(
+                        sp.TNat,
+                        sp.TNat,
                     )
                 ), 
                 schema_last_id = sp.TNat,
@@ -65,7 +65,7 @@ class SchemaRegistry(sp.Contract):
         # Verifying whether the caller address is our Registry contract
         sp.verify(self.data.logic_contract_address == sp.sender, message = "Incorrect caller")
 
-        self.data.issuer_schema_map[parameters.issuer_did] = parameters.schema_binding
+        self.data.issuer_schema_map[parameters.issuer_did] = {parameters.schema_binding.schema_id: parameters.schema_binding.status}
         
     @sp.onchain_view()
     def get(self, schema_id):
@@ -74,6 +74,29 @@ class SchemaRegistry(sp.Contract):
     @sp.onchain_view()
     def get_schema_owner_address(self, schema_id):
         sp.result(self.data.schema_map[schema_id].schema_owner)
+
+    @sp.onchain_view()
+    def verify_issuer_schema_binding(self, parameters):
+        sp.set_type(parameters.issuer_did, sp.TString)
+        sp.set_type(parameters.schema_id, sp.TNat)
+
+        issuer_did = parameters.issuer_did
+        schema_id = parameters.schema_id
+
+        with sp.if_(
+            self.data.issuer_schema_map.contains(issuer_did)
+            &
+            self.data.issuer_schema_map[issuer_did].contains(schema_id)
+        ) :
+            sp.result(sp.record(
+                binding_exists = True,
+                status = self.data.issuer_schema_map[issuer_did][schema_id]
+            ))
+        with sp.else_():
+            sp.result(sp.record(
+                binding_exists = False,
+                status = 0
+            ))
 
     @sp.entry_point
     def change_logic_contract_address(self, new_logic_contract_address):
