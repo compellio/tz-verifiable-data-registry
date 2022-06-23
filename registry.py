@@ -143,7 +143,6 @@ class Registry(sp.Contract):
         # Calling the Storage contract with the parameters we defined
         sp.transfer(params, sp.mutez(0), logic_contract)
 
-
     @sp.entry_point
     def set_issuer_active(self, issuer_did):
         sp.set_type(issuer_did, sp.TString)
@@ -244,7 +243,7 @@ class Registry(sp.Contract):
             issuer_did = issuer_did,
             schema_id = schema_id
         )
-        
+
         # Defining the parameters' types
         binding_result = sp.view(
             "verify_issuer_schema_binding",

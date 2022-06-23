@@ -290,7 +290,7 @@ class RegistryLogic(sp.Contract):
 
         # Defining the Logic contract itself and its entry point for the call
         logic_contract = sp.contract(contract_data, self.get_contract_address('issuer_registry_contract'),
-                                     "add").open_some()
+            "update").open_some()
 
         # Defining the parameters that will be passed to the Storage contract
         params = sp.record(
