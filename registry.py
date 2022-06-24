@@ -143,7 +143,6 @@ class Registry(sp.Contract):
         # Calling the Storage contract with the parameters we defined
         sp.transfer(params, sp.mutez(0), logic_contract)
 
-
     @sp.entry_point
     def set_issuer_active(self, issuer_did):
         sp.set_type(issuer_did, sp.TString)
@@ -200,6 +199,25 @@ class Registry(sp.Contract):
 
         sp.transfer(params, sp.mutez(0), logic_contract)
 
+    @sp.onchain_view()
+    def get_issuer(self, issuer_did):
+        # Defining the parameters' types
+        sp.set_type(issuer_did, sp.TString)
+        
+        # Defining the parameters' types
+        issuer = sp.view(
+            "get_issuer",
+            self.data.logic_contract,
+            issuer_did,
+            t = sp.TRecord(
+                issuer_did  = sp.TString,
+                issuer_data = sp.TString,
+                status = sp.TString
+            )
+        ).open_some("Invalid view");
+        
+        sp.result(issuer)
+
     @sp.entry_point
     def bind_issuer_schema(self, issuer_did, schema_id):
         sp.set_type(issuer_did, sp.TString)
@@ -216,23 +234,28 @@ class Registry(sp.Contract):
         sp.transfer(params, sp.mutez(0), logic_contract)
 
     @sp.onchain_view()
-    def get_issuer(self, issuer_did):
+    def verify_issuer_schema_binding(self, issuer_did, schema_id):
         # Defining the parameters' types
-        sp.set_type(issuer_did, sp.TNat)
-        
+        sp.set_type(issuer_did, sp.TString)
+        sp.set_type(schema_id, sp.TNat)
+
+        binding_record = sp.record(
+            issuer_did = issuer_did,
+            schema_id = schema_id
+        )
+
         # Defining the parameters' types
-        issuer = sp.view(
-            "get_issuer",
+        binding_result = sp.view(
+            "verify_issuer_schema_binding",
             self.data.logic_contract,
-            issuer_did,
+            binding_record,
             t = sp.TRecord(
-                issuer_did  = sp.TString,
-                issuer_data = sp.TString,
-                status = sp.TString
+                binding_exists = sp.TBool,
+                status = sp.TNat
             )
         ).open_some("Invalid view");
         
-        sp.result(issuer)
+        sp.result(binding_result)
 
 @sp.add_test(name = "Registry")
 def test():
