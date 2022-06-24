@@ -60,7 +60,7 @@ This contract's endpoints implement the calls for all registry functionality:
 ### Registry (Lambda Contract)
 This is the contract that does not implement any functionality or has storage. It is used as an immutable entry point so that any re-deployments or changes to the underlying contracts do not disturb the clients that are already in place.
 
-## Instalation
+## Installation
 
 You will need to have a **Wallet** on an existing Tezos Testnet. We have used **Ithacanet** for our tests.
 
@@ -77,8 +77,22 @@ You will need to have a **Wallet** on an existing Tezos Testnet. We have used **
    - `schema_registry_contract` - **schemaRegistry** contract address
 
 ### Testing
+#### Unit Testing
+Unit tests were implemented in testScenarios.py. The unit tests require the storage and logic contract files in order to function:
 
-There are two ways to test the smart contracts:
 
+- registryLogic.py
+- schemaRegistry.py
+- issuerRegistry.py
+
+The logic is divided across different files, therefore <ins>we use [smartPy IDE](https://smartpy.io/ide) for running the tests</ins>  and not the command line client.
+
+In order to run the tests you will need to:
+1. Store the required contracts to the smartPy IDE. This can be done by using the Create Contract functionality. The names of the contracts need to be the same as the file name (eg. registryLogic.py) in order for the tests to load the contracts successfully.
+2. Store the testScenario.py to the IDE.
+3. Run the testScenario contract.
+
+#### Functionality Testing
+There are two ways to test the smart contracts after being deployed on the testnet:
 - Open https://better-call.dev/ in your browser, find your contract and navigate to the "Interact" Tab.
 - Install our Test suite. Installation instructions can be found [here](https://github.com/compellio/tz-verifiable-data-registry/tree/testnet/test-suite)
