@@ -33,6 +33,21 @@ class IssuerRegistry(sp.Contract):
         self.data.issuer_map[parameters.issuer_did] = parameters
 
     @sp.entry_point
+    def change_data(self, parameters):
+        sp.set_type(parameters.issuer_did, sp.TString)
+        sp.set_type(parameters.issuer_data, sp.TString)
+
+        # Verifying whether the caller address is our Registry contract
+        sp.verify(self.data.logic_contract_address == sp.sender, message = "Incorrect caller")
+
+        issuer_data = self.data.issuer_map[parameters.issuer_did]
+        
+        with sp.modify_record(issuer_data, "data") as data:
+            data.issuer_data = parameters.issuer_data
+
+        self.data.issuer_map[parameters.issuer_did] = issuer_data
+
+    @sp.entry_point
     def change_status(self, parameters):
         sp.set_type(parameters.issuer_did, sp.TString)
         sp.set_type(parameters.status, sp.TNat)
