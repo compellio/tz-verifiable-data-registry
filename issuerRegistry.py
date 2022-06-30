@@ -34,6 +34,7 @@ class IssuerRegistry(sp.Contract):
 
     @sp.entry_point
     def change_data(self, parameters):
+        # Defining the parameters' types
         sp.set_type(parameters.issuer_did, sp.TString)
         sp.set_type(parameters.issuer_data, sp.TString)
 
@@ -49,6 +50,7 @@ class IssuerRegistry(sp.Contract):
 
     @sp.entry_point
     def change_status(self, parameters):
+        # Defining the parameters' types
         sp.set_type(parameters.issuer_did, sp.TString)
         sp.set_type(parameters.status, sp.TNat)
 
@@ -64,6 +66,7 @@ class IssuerRegistry(sp.Contract):
 
     @sp.entry_point
     def change_owner(self, parameters):
+        # Defining the parameters' types
         sp.set_type(parameters.issuer_did, sp.TString)
         sp.set_type(parameters.new_owner_address, sp.TAddress)
 
@@ -104,7 +107,7 @@ class IssuerRegistry(sp.Contract):
 def test():
     sp.add_compilation_target("issuerRegistry",
         IssuerRegistry(
-            sp.address('KT1MWPUKoU4FUVr1nBA4cwjMSoSsxqE3x9kc'),
-            sp.address('tz1WM1wDM4mdtD3qMiELJSgbB14ZryyHNu7P')
+            sp.address('KT1_contract_address'),
+            sp.address('tz1_certifier_address')
         )
     )

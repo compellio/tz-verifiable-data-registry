@@ -44,6 +44,7 @@ class SchemaRegistry(sp.Contract):
 
     @sp.entry_point
     def change_status(self, parameters):
+        # Defining the parameters' types
         sp.set_type(parameters.schema_id, sp.TNat)
         sp.set_type(parameters.status, sp.TNat)
 
@@ -59,6 +60,7 @@ class SchemaRegistry(sp.Contract):
 
     @sp.entry_point
     def bind_issuer_schema(self, parameters):
+        # Defining the parameters' types
         sp.set_type(parameters.issuer_did, sp.TString)
         sp.set_type(parameters.schema_binding, sp.TRecord( schema_id = sp.TNat, status = sp.TNat ))
 
@@ -66,17 +68,22 @@ class SchemaRegistry(sp.Contract):
         sp.verify(self.data.logic_contract_address == sp.sender, message = "Incorrect caller")
 
         self.data.issuer_schema_map[parameters.issuer_did] = {parameters.schema_binding.schema_id: parameters.schema_binding.status}
-        
-    @sp.onchain_view()
-    def get(self, schema_id):
-        sp.result(self.data.schema_map[schema_id])
 
-    @sp.onchain_view()
-    def get_schema_owner_address(self, schema_id):
-        sp.result(self.data.schema_map[schema_id].schema_owner)
+    @sp.entry_point
+    def change_issuer_schema_binding_status(self, parameters):
+        # Defining the parameters' types
+        sp.set_type(parameters.issuer_did, sp.TString)
+        sp.set_type(parameters.schema_id, sp.TNat)
+        sp.set_type(parameters.status, sp.TNat)
 
+        # Verifying whether the caller address is our Registry contract
+        sp.verify(self.data.logic_contract_address == sp.sender, message = "Incorrect caller")
+
+        self.data.issuer_schema_map[parameters.issuer_did][parameters.schema_id] = parameters.status
+    
     @sp.onchain_view()
     def verify_issuer_schema_binding(self, parameters):
+        # Defining the parameters' types
         sp.set_type(parameters.issuer_did, sp.TString)
         sp.set_type(parameters.schema_id, sp.TNat)
 
@@ -97,6 +104,14 @@ class SchemaRegistry(sp.Contract):
                 binding_exists = False,
                 status = 0
             ))
+        
+    @sp.onchain_view()
+    def get(self, schema_id):
+        sp.result(self.data.schema_map[schema_id])
+
+    @sp.onchain_view()
+    def get_schema_owner_address(self, schema_id):
+        sp.result(self.data.schema_map[schema_id].schema_owner)
 
     @sp.entry_point
     def change_logic_contract_address(self, new_logic_contract_address):
@@ -109,7 +124,7 @@ class SchemaRegistry(sp.Contract):
 def test():
     sp.add_compilation_target("schemaRegistry",
         SchemaRegistry(
-            sp.address('KT1MWPUKoU4FUVr1nBA4cwjMSoSsxqE3x9kc'),
-            sp.address('tz1WM1wDM4mdtD3qMiELJSgbB14ZryyHNu7P')
+            sp.address('KT1_contract_address'),
+            sp.address('tz1_certifier_address')
         )
     )
