@@ -1,27 +1,56 @@
 
 const $ = require("jquery");
-const { TezosToolkit} = require('@taquito/taquito');
+const { TezosToolkit } = require('@taquito/taquito');
 const { BeaconWallet } = require('@taquito/beacon-wallet');
 
 function initUI() {
     updateUISetting({
-        provider: "https://hangzhounet.smartpy.io/",
-        contractAddress: "KT1RTfPB3zYyCq2hZS6ut9tRb7P1KRc1hCCf"
+        provider: "https://ghostnet.ecadinfra.com",
+        contractAddress: "KT1MoSz8nXD6sW2KXNvjxxRbx4fzPjexhUM7"
     });
 
     // setup UI actions
-    $('#btn_issue').click(() => add_schema($('#schema_id').val(), $('#schema_data').val()));
-    $('#btn_get').click(() => get_schema($('#schema_id_get').val()));
-    $('#btn_issuer_issue').click(() => add_issuer($('#issuer_data').val()));
-    $('#btn_issuer_get').click(() => get_issuer($('#issuer_id_get').val()));
 
-    $('#btn_settings').click(() => $('#settings-box').toggle());
-    $('#btn_connect').click(() => connectWallet());
+    // Add schema
+    $("#btn_add_schema").click(() => add_schema($("schema_data").val()));
+
+    // Set schema status
+    $("#btn_schema_activate").click(() => set_schema_status($("#schema_id_status").val(), "activate"));
+    $("#btn_schema_deactivate").click(() => set_schema_status($("#schema_id_status").val(), "deactivate"));
+    $("#btn_schema_set_status").click(() => set_schema_status($("#schema_id_status").val(), "set", $("#schema_status_id").val()));
+
+    // Get schema
+    $("#btn_get").click(() => get_schema($("#schema_id_get").val()));
+
+    // Add / Update issuer
+    $("#btn_issuer_issue").click(() => add_issuer($("#issuer_did").val(), $("#issuer_data").val()));
+
+    // Update issuer owner
+    $("#btn_issuer_owner_update").click(() => set_issuer_owner($("#issuer_did").val(), $("#issuer_owner").val()));
+
+    // Get issuer
+    $("#btn_issuer_get").click(() => get_issuer($("#issuer_id_get").val()));
+
+    // Set issuer status
+    $("#btn_issuer_activate").click(() => set_issuer_status($("#issuer_did").val(), "activate"));
+    $("#btn_issuer_deactivate").click(() => set_issuer_status($("#issuer_did").val(), "deactivate"));
+    $("#btn_issuer_set_status").click(() => set_issuer_status($("#issuer_did").val(), "set", $("#issuer_status_id").val()));
+
+    // Add binding
+    $("#btn_bind").click(() => bind_issuer_schema($("#binding_issuer_did").val(), $("#binding_schema_id").val()));
+
+    // Set binding status
+    $("#btn_binding_activate").click(() => set_binding_status($("#binding_issuer_did").val(), $("#binding_schema_id").val(), "activate"));
+    $("#btn_binding_deactivate").click(() => set_binding_status($("#binding_issuer_did").val(), $("#binding_schema_id").val(), "deactivate"));
+    $("#btn_binding_set_status").click(() => set_binding_status($("#binding_issuer_did").val(), $("#binding_schema_id").val(), "set", $("#binding_status_id").val()));
+
+    // Verify binding
+    $("#btn_check_binding").click(() => verify_binding($("#binding_issuer_did").val(), $("#binding_schema_id").val()));
+
+    // Settings / Wallet
+    $("#btn_settings").click(() => $("#settings-box").toggleClass('d-none'));
+    $("#btn_connect").click(() => connectWallet());
 }
-
-$( document ).ready(function() {
-    connectWallet()
-});
 
 function updateUISetting(accountSettings) {
     $('#provider').val(accountSettings.provider);
@@ -35,19 +64,28 @@ function readUISettings() {
     };
 }
 
-function reportResult(result, type, itemSelector) {
-    return $(itemSelector)
-        .html(result)
-        .removeClass()
-        .addClass("result-bar")
-        .addClass(type == "error" ?
-            "result-false" :
-            type == "ok" ?
-            "result-true" :
-            "result-load");
+function showViewResult(result)
+{
+    $("#view-result-pre").html(result)
+    $("#view-result").addClass('d-flex').removeClass('d-none')
+}
+
+function showResultAlert(result, type)
+{
+    $("#alert-result").attr('class', `alert ${type}`);
+    $("#alert-result").html(result)
+}
+
+function clearAll()
+{
+    $("#view-result").addClass('d-none')
+    $("#view-result-pre").html("")
+    $("#alert-result").attr('class', 'd-none');
+    $("#alert-result").html("")
 }
 
 let tezos, wallet;
+let browser_operations_url = "https://ghostnet.tzkt.io/" 
 
 // This function will connect your application with the wallet
 function connectWallet() {
@@ -56,106 +94,276 @@ function connectWallet() {
 
     const options = {
         name: 'Schema Registry',
-        preferredNetwork: "hangzhounet"
+        preferredNetwork: "ghostnet"
     };
     wallet = new BeaconWallet(options);
 
     wallet
         .requestPermissions({
             network: {
-                type: "hangzhounet"
+                type: "ithacanet"
             }
         })
         .then((_) => wallet.getPKH())
         .then((address) => console.log(address))
         .then(() => tezos.setWalletProvider(wallet))
-        .then(() => $('.overlay').remove());
-    
-    
-
+        .then(() => $('#app-overlay').remove())
+        .then(() => $('#settings-pills').removeClass("d-none"));
 }
 
-function add_schema(schema_id, schema_data) 
-{
+function add_schema(schema_data) {
     const accountSettings = readUISettings();
 
     return tezos.wallet.at(accountSettings.contractAddress)
         .then((contract) => {
-            reportResult("Sending...", "info", "#result-bar");
-            
-            return contract.methods.add_schema(schema_data, schema_id).send();
+            clearAll()
+            showResultAlert("Sending...", "alert-info");
+
+            return contract.methods.add_schema(String(schema_data)).send();
         })
         .then((op) => {
-            reportResult("Waiting for confirmation...", "info", "#result-bar");
-            return op.confirmation(1).then(() => op.hash);
+            showResultAlert("Waiting for confirmation...", "alert-info");
+            return op.confirmation(1).then(() => op);
         })
-        .then(() => {
-            reportResult(`Updated entry ${schema_id}`, "ok", "#result-bar");
+        .then((data) => {
+            showResultAlert(`Created new Schema <a class="btn btn-success ms-2" target="_blank" href="${browser_operations_url + data.opHash}">See Operation</a>`, "alert-success");
         })
         .catch((error) => {
-            reportResult(error.message, "error", "#result-bar");
+            showResultAlert(error.message, "alert-danger");
         });
 }
 
-function get_schema(schema_id) 
-{
+function set_schema_status(schema_id, status_operation, status_id = 0) {
+    const accountSettings = readUISettings();
+
+    let method;
+
+    return tezos.wallet.at(accountSettings.contractAddress)
+        .then((contract) => {
+            clearAll()
+            showResultAlert("Sending...", "alert-info");
+
+            switch(status_operation) {
+                case "activate":
+                    method = contract.methods.set_schema_active(parseInt(schema_id))
+                    break;
+                case "deactivate":
+                    method = contract.methods.set_schema_deprecated(parseInt(schema_id))
+                    break;
+                case "set":
+                    method = contract.methods.set_schema_status(parseInt(schema_id), parseInt(status_id))
+                    break;
+              }
+
+            return method.send();
+        })
+        .then((op) => {
+            showResultAlert("Waiting for confirmation...", "alert-info");
+            return op.confirmation(1).then(() => op);
+        })
+        .then((data) => {
+            showResultAlert(`Updated Schema Status <a class="btn btn-success ms-2" target="_blank" href="${browser_operations_url + data.opHash}">See Operation</a>`, "alert-success");
+        })
+        .catch((error) => {
+            showResultAlert(error.message, "alert-danger");
+        });
+}
+
+function get_schema(schema_id) {
     const accountSettings = readUISettings();
     const contractCallFib = accountSettings.contractAddress;
 
     return tezos.wallet.at(accountSettings.contractAddress)
         .then((contract) => {
-            reportResult("Getting...", "info", "#result-bar");
-            
+            clearAll()
+            showResultAlert("Getting...", "alert-info");
+
             return contract.contractViews.get_schema(schema_id).executeView({ viewCaller: contractCallFib });
         })
         .then((viewResult) => {
-            reportResult("Finished", "ok", "#result-bar");
-            alert(JSON.stringify(viewResult))
+            showResultAlert("Finished", "alert-success");
+            showViewResult(JSON.stringify(viewResult))
         })
         .catch((error) => {
-            reportResult(error.message, "error", "#result-bar");
+            showResultAlert(error.message, "alert-danger");
         });
 }
 
-function add_issuer(issuer_data) 
-{
+function add_issuer(issuer_did, issuer_data) {
     const accountSettings = readUISettings();
 
     return tezos.wallet.at(accountSettings.contractAddress)
         .then((contract) => {
-            reportResult("Sending...", "info", "#result-bar");
-            
-            return contract.methods.add_issuer(issuer_data).send();
+            clearAll()
+            showResultAlert("Sending...", "alert-info");
+
+            return contract.methods.add_issuer(String(issuer_data), String(issuer_did)).send();
         })
         .then((op) => {
-            reportResult("Waiting for confirmation...", "info", "#result-bar");
-            return op.confirmation(1).then(() => op.hash);
+            showResultAlert("Waiting for confirmation...", "alert-info");
+            return op.confirmation(1).then(() => op);
         })
-        .then(() => {
-            reportResult(`Updated entry`, "ok", "#result-bar");
+        .then((data) => {
+            showResultAlert(`Created new Issuer <a class="btn btn-success ms-2" target="_blank" href="${browser_operations_url + data.opHash}">See Operation</a>`, "alert-success");
         })
         .catch((error) => {
-            reportResult(error.message, "error", "#result-bar");
+            showResultAlert(error.message, "alert-danger");
         });
 }
 
-function get_issuer(issuer_id) 
-{
+function set_issuer_owner(issuer_did, issuer_address) {
+    const accountSettings = readUISettings();
+
+    return tezos.wallet.at(accountSettings.contractAddress)
+        .then((contract) => {
+            clearAll()
+            showResultAlert("Sending...", "alert-info");
+
+            return contract.methods.set_issuer_owner(String(issuer_did), String(issuer_address)).send();
+        })
+        .then((op) => {
+            showResultAlert("Waiting for confirmation...", "alert-info");
+            return op.confirmation(1).then(() => op);
+        })
+        .then((data) => {
+            showResultAlert(`Updated Issuer Owner Address <a class="btn btn-success ms-2" target="_blank" href="${browser_operations_url + data.opHash}">See Operation</a>`, "alert-success");
+        })
+        .catch((error) => {
+            showResultAlert(error.message, "alert-danger");
+        });
+}
+
+function set_issuer_status(issuer_did, status_operation, status_id = 0) {
+    const accountSettings = readUISettings();
+
+    let method;
+
+    return tezos.wallet.at(accountSettings.contractAddress)
+        .then((contract) => {
+            clearAll()
+            showResultAlert("Sending...", "alert-info");
+
+            switch(status_operation) {
+                case "activate":
+                    method = contract.methods.set_issuer_active(String(issuer_did))
+                    break;
+                case "deactivate":
+                    method = contract.methods.set_issuer_deprecated(String(issuer_did))
+                    break;
+                case "set":
+                    method = contract.methods.set_issuer_status(String(issuer_did), parseInt(status_id))
+                    break;
+              }
+
+            return method.send();
+        })
+        .then((op) => {
+            showResultAlert("Waiting for confirmation...", "alert-info");
+            return op.confirmation(1).then(() => op);
+        })
+        .then((data) => {
+            showResultAlert(`Updated Ιssuer Status <a class="btn btn-success ms-2" target="_blank" href="${browser_operations_url + data.opHash}">See Operation</a>`, "alert-success");
+        })
+        .catch((error) => {
+            showResultAlert(error.message, "alert-danger");
+        });
+}
+
+function get_issuer(issuer_did) {
     const accountSettings = readUISettings();
     const contractCallFib = accountSettings.contractAddress;
 
     return tezos.wallet.at(accountSettings.contractAddress)
         .then((contract) => {
-            reportResult("Sending...", "info", "#result-bar");
-            
-            return contract.contractViews.get_issuer(issuer_id).executeView({ viewCaller: contractCallFib });
+            clearAll()
+            showResultAlert("Getting...", "alert-info");
+
+            return contract.contractViews.get_issuer(issuer_did).executeView({ viewCaller: contractCallFib });
         })
         .then((viewResult) => {
-            reportResult("Finished", "ok", "#result-bar");
-            alert(JSON.stringify(viewResult))
+            showResultAlert("Finished", "alert-success");
+            showViewResult(JSON.stringify(viewResult))
         })
         .catch((error) => {
-            reportResult(error.message, "error", "#result-bar");
+            showResultAlert(error.message, "alert-danger");
+        });
+}
+
+function bind_issuer_schema(issuer_did, schema_id) {
+    const accountSettings = readUISettings();
+
+    return tezos.wallet.at(accountSettings.contractAddress)
+        .then((contract) => {
+            clearAll()
+            showResultAlert("Sending...", "alert-info");
+
+            return contract.methods.bind_issuer_schema(String(issuer_did), parseInt(schema_id)).send();
+        })
+        .then((op) => {
+            showResultAlert("Waiting for confirmation...", "alert-info");
+            return op.confirmation(1).then(() => op);
+        })
+        .then((data) => {
+            showResultAlert(`Created new Binding <a class="btn btn-success ms-2" target="_blank" href="${browser_operations_url + data.opHash}">See Operation</a>`, "alert-success");
+        })
+        .catch((error) => {
+            showResultAlert(error.message, "alert-danger");
+        });
+}
+
+function set_binding_status(issuer_did, schema_id, status_operation, status_id = 0) {
+    const accountSettings = readUISettings();
+
+    let method;
+
+    return tezos.wallet.at(accountSettings.contractAddress)
+        .then((contract) => {
+            clearAll()
+            showResultAlert("Sending...", "alert-info");
+
+            switch(status_operation) {
+                case "activate":
+                    method = contract.methods.set_binding_active(String(issuer_did), parseInt(schema_id))
+                    break;
+                case "deactivate":
+                    method = contract.methods.set_binding_deprecated(String(issuer_did), parseInt(schema_id))
+                    break;
+                case "set":
+                    method = contract.methods.set_binding_status(parseInt(schema_id), parseInt(status_id), String(issuer_did))
+                    break;
+              }
+
+            return method.send();
+        })
+        .then((op) => {
+            showResultAlert("Waiting for confirmation...", "alert-info");
+            return op.confirmation(1).then(() => op);
+        })
+        .then((data) => {
+            showResultAlert(`Updated Binding Status <a class="btn btn-success ms-2" target="_blank" href="${browser_operations_url + data.opHash}">See Operation</a>`, "alert-success");
+        })
+        .catch((error) => {
+            showResultAlert(error.message, "alert-danger");
+        });
+}
+
+function verify_binding(issuer_did, schema_id) {
+    const accountSettings = readUISettings();
+    const contractCallFib = accountSettings.contractAddress;
+
+    return tezos.wallet.at(accountSettings.contractAddress)
+        .then((contract) => {
+            clearAll()
+            showResultAlert("Getting...", "alert-info");
+
+            return contract.contractViews.verify_binding(String(issuer_did), parseInt(schema_id)).executeView({ viewCaller: contractCallFib });
+        })
+        .then((viewResult) => {
+            showResultAlert("Finished", "alert-success");
+            showViewResult(JSON.stringify(viewResult))
+        })
+        .catch((error) => {
+            showResultAlert(error.message, "alert-danger");
         });
 }
 

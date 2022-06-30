@@ -130,7 +130,7 @@ class RegistryLogic(sp.Contract):
 
     # Verify issuer-schema binding is allowed
     @sp.private_lambda(with_storage="read-only")
-    def verify_issuer_schema_binding_status_change_allowed(self, params):
+    def verify_binding_status_change_allowed(self, params):
         sp.set_type(params.owner_address, sp.TAddress)
         sp.set_type(params.current_status, sp.TNat)
         sp.set_type(params.new_status, sp.TNat)
@@ -544,7 +544,7 @@ class RegistryLogic(sp.Contract):
         sp.transfer(params, sp.mutez(0), storage_contract)
 
     @sp.entry_point
-    def set_issuer_schema_binding_active(self, parameters):
+    def set_binding_active(self, parameters):
         # Defining the parameters' types
         sp.set_type(parameters.issuer_did, sp.TString)
         sp.set_type(parameters.schema_id, sp.TNat)
@@ -553,7 +553,7 @@ class RegistryLogic(sp.Contract):
         owner_address = self.get_issuer_owner_address(parameters.issuer_did)
         current_issuer_status = self.get_issuer_status(parameters.issuer_did)
         
-        sp.verify(self.verify_issuer_schema_binding_status_change_allowed(
+        sp.verify(self.verify_binding_status_change_allowed(
             sp.record(
                 owner_address = owner_address,
                 current_status = current_issuer_status,
@@ -565,7 +565,7 @@ class RegistryLogic(sp.Contract):
         contract_data = sp.TRecord(issuer_did = sp.TString, schema_id = sp.TNat, status = sp.TNat)
 
         # Defining the Storage contract itself and its entry point for the call
-        storage_contract = sp.contract(contract_data, self.get_contract_address('schema_registry_contract'), "change_issuer_schema_binding_status").open_some()
+        storage_contract = sp.contract(contract_data, self.get_contract_address('schema_registry_contract'), "set_binding_status").open_some()
 
         # Defining the parameters that will be passed to the Storage contract
         params = sp.record(
@@ -578,7 +578,7 @@ class RegistryLogic(sp.Contract):
         sp.transfer(params, sp.mutez(0), storage_contract)
 
     @sp.entry_point
-    def set_issuer_schema_binding_deprecated(self, parameters):
+    def set_binding_deprecated(self, parameters):
         # Defining the parameters' types
         sp.set_type(parameters.issuer_did, sp.TString)
         sp.set_type(parameters.schema_id, sp.TNat)
@@ -587,7 +587,7 @@ class RegistryLogic(sp.Contract):
         owner_address = self.get_issuer_owner_address(parameters.issuer_did)
         current_issuer_status = self.get_issuer_status(parameters.issuer_did)
         
-        sp.verify(self.verify_issuer_schema_binding_status_change_allowed(
+        sp.verify(self.verify_binding_status_change_allowed(
             sp.record(
                 owner_address = owner_address,
                 current_status = current_issuer_status,
@@ -599,7 +599,7 @@ class RegistryLogic(sp.Contract):
         contract_data = sp.TRecord(issuer_did = sp.TString, schema_id = sp.TNat, status = sp.TNat)
 
         # Defining the Storage contract itself and its entry point for the call
-        storage_contract = sp.contract(contract_data, self.get_contract_address('schema_registry_contract'), "change_issuer_schema_binding_status").open_some()
+        storage_contract = sp.contract(contract_data, self.get_contract_address('schema_registry_contract'), "set_binding_status").open_some()
 
         # Defining the parameters that will be passed to the Storage contract
         params = sp.record(
@@ -612,7 +612,7 @@ class RegistryLogic(sp.Contract):
         sp.transfer(params, sp.mutez(0), storage_contract)
 
     @sp.entry_point
-    def set_issuer_schema_binding_status(self, parameters):
+    def set_binding_status(self, parameters):
         # Defining the parameters' types
         sp.set_type(parameters.issuer_did, sp.TString)
         sp.set_type(parameters.schema_id, sp.TNat)
@@ -622,7 +622,7 @@ class RegistryLogic(sp.Contract):
         owner_address = self.get_issuer_owner_address(parameters.issuer_did)
         current_issuer_status = self.get_issuer_status(parameters.issuer_did)
         
-        sp.verify(self.verify_issuer_schema_binding_status_change_allowed(
+        sp.verify(self.verify_binding_status_change_allowed(
             sp.record(
                 owner_address = owner_address,
                 current_status = current_issuer_status,
@@ -634,7 +634,7 @@ class RegistryLogic(sp.Contract):
         contract_data = sp.TRecord(issuer_did = sp.TString, schema_id = sp.TNat, status = sp.TNat)
 
         # Defining the Storage contract itself and its entry point for the call
-        storage_contract = sp.contract(contract_data, self.get_contract_address('schema_registry_contract'), "change_issuer_schema_binding_status").open_some()
+        storage_contract = sp.contract(contract_data, self.get_contract_address('schema_registry_contract'), "set_binding_status").open_some()
 
         # Verify status ID exists
         sp.verify(self.data.issuer_statuses.contains(parameters.status), message = "Incorrect status")
@@ -650,7 +650,7 @@ class RegistryLogic(sp.Contract):
         sp.transfer(params, sp.mutez(0), storage_contract)
 
     @sp.onchain_view()
-    def verify_issuer_schema_binding(self, parameters):
+    def verify_binding(self, parameters):
         # Defining the parameters' types
         sp.set_type(parameters.issuer_did, sp.TString)
         sp.set_type(parameters.schema_id, sp.TNat)
@@ -664,7 +664,7 @@ class RegistryLogic(sp.Contract):
 
         # Defining the parameters' types
         binding_result = sp.view(
-            "verify_issuer_schema_binding",
+            "verify_binding",
             self.get_contract_address('schema_registry_contract'),
             binding_record,
             t = sp.TRecord(

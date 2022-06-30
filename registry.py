@@ -282,7 +282,7 @@ class Registry(sp.Contract):
         sp.transfer(params, sp.mutez(0), logic_contract)
 
     @sp.entry_point
-    def set_issuer_schema_binding_active(self, issuer_did, schema_id):
+    def set_binding_active(self, issuer_did, schema_id):
         # Defining the parameters' types
         sp.set_type(issuer_did, sp.TString)
         sp.set_type(schema_id, sp.TNat)
@@ -291,19 +291,19 @@ class Registry(sp.Contract):
         contract_data = sp.TRecord(issuer_did = sp.TString, schema_id = sp.TNat)
 
         # Defining the Logic contract itself and its entry point for the call
-        logic_contract = sp.contract(contract_data, self.data.logic_contract, "set_issuer_schema_binding_active").open_some()
+        logic_contract = sp.contract(contract_data, self.data.logic_contract, "set_binding_active").open_some()
 
         # Defining the parameters that will be passed to the Logic contract
         params = sp.record(
             issuer_did = issuer_did,
-            schema_id = sp.TNat
+            schema_id = schema_id
         )
 
         # Calling the Logic contract with the parameters we defined
         sp.transfer(params, sp.mutez(0), logic_contract)
 
     @sp.entry_point
-    def set_issuer_schema_binding_deprecated(self, issuer_did, schema_id):
+    def set_binding_deprecated(self, issuer_did, schema_id):
         # Defining the parameters' types
         sp.set_type(issuer_did, sp.TString)
         sp.set_type(schema_id, sp.TNat)
@@ -312,19 +312,19 @@ class Registry(sp.Contract):
         contract_data = sp.TRecord(issuer_did = sp.TString, schema_id = sp.TNat)
 
         # Defining the Logic contract itself and its entry point for the call
-        logic_contract = sp.contract(contract_data, self.data.logic_contract, "set_issuer_schema_binding_deprecated").open_some()
+        logic_contract = sp.contract(contract_data, self.data.logic_contract, "set_binding_deprecated").open_some()
 
         # Defining the parameters that will be passed to the Logic contract
         params = sp.record(
             issuer_did = issuer_did,
-            schema_id = sp.TNat
+            schema_id = schema_id
         )
 
         # Calling the Logic contract with the parameters we defined
         sp.transfer(params, sp.mutez(0), logic_contract)
 
     @sp.entry_point
-    def set_issuer_schema_binding_status(self, issuer_did, schema_id, status):
+    def set_binding_status(self, issuer_did, schema_id, status):
         # Defining the parameters' types
         sp.set_type(issuer_did, sp.TString)
         sp.set_type(schema_id, sp.TNat)
@@ -334,20 +334,20 @@ class Registry(sp.Contract):
         contract_data = sp.TRecord(issuer_did = sp.TString, schema_id = sp.TNat, status = sp.TNat)
 
         # Defining the Logic contract itself and its entry point for the call
-        logic_contract = sp.contract(contract_data, self.data.logic_contract, "set_issuer_schema_binding_status").open_some()
+        logic_contract = sp.contract(contract_data, self.data.logic_contract, "set_binding_status").open_some()
 
         # Defining the parameters that will be passed to the Logic contract
         params = sp.record(
             issuer_did = issuer_did,
-            schema_id = sp.TNat,
-            status = sp.TNat
+            schema_id = schema_id,
+            status = status
         )
 
         # Calling the Logic contract with the parameters we defined
         sp.transfer(params, sp.mutez(0), logic_contract)
 
     @sp.onchain_view()
-    def verify_issuer_schema_binding(self, parameters):
+    def verify_binding(self, parameters):
         # Defining the parameters' types
         sp.set_type(parameters.issuer_did, sp.TString)
         sp.set_type(parameters.schema_id, sp.TNat)
@@ -361,7 +361,7 @@ class Registry(sp.Contract):
 
         # Defining the parameters' types
         binding_result = sp.view(
-            "verify_issuer_schema_binding",
+            "verify_binding",
             self.data.logic_contract,
             binding_record,
             t = sp.TRecord(

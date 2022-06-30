@@ -338,66 +338,66 @@ def test():
     registry_logic_contract.bind_issuer_schema(bind_issuer_schema_valid).run(valid = False, sender = operator_B_address)
 
     # Verify Issuer to Schema binding - Issuer and Schema both exist
-    scenario.verify(registry_logic_contract.verify_issuer_schema_binding(bind_issuer_schema_valid) == sp.record(
+    scenario.verify(registry_logic_contract.verify_binding(bind_issuer_schema_valid) == sp.record(
         binding_exists = True,
         status = 1
     ))
 
     # Verify Issuer to Schema binding - Issuer exists, Schema does not
-    scenario.verify(registry_logic_contract.verify_issuer_schema_binding(bind_issuer_schema_invalid_schema_id) == sp.record(
+    scenario.verify(registry_logic_contract.verify_binding(bind_issuer_schema_invalid_schema_id) == sp.record(
         binding_exists = False,
         status = 0
     ))
 
     # Verify Issuer to Schema binding - Issuer and Schema do not exist
-    scenario.verify(registry_logic_contract.verify_issuer_schema_binding(bind_issuer_schema_invalid_issuer_did) == sp.record(
+    scenario.verify(registry_logic_contract.verify_binding(bind_issuer_schema_invalid_issuer_did) == sp.record(
         binding_exists = False,
         status = 0
     ))
 
     scenario.h3("Updating Issuer-Schema binding status")
 
-    set_issuer_schema_binding_status_valid = sp.record(
+    set_binding_status_valid = sp.record(
         schema_id = 0,
         issuer_did = issuer_did,
         status = 2
     )
 
-    set_issuer_schema_binding_status_invalid = sp.record(
+    set_binding_status_invalid = sp.record(
         schema_id = 0,
         issuer_did = issuer_did,
         status = 999
     )
 
     scenario.show([
-        set_issuer_schema_binding_status_valid,
-        set_issuer_schema_binding_status_invalid,
+        set_binding_status_valid,
+        set_binding_status_invalid,
     ], stripStrings = True)
 
     # Set and verify setting Issuer-Schema binding as deprecated
     scenario.h4("Setting Issuer-Schema binding as deprecated")
-    registry_logic_contract.set_issuer_schema_binding_deprecated(bind_issuer_schema_valid).run(valid = True, sender = operator_A_address)
-    scenario.verify(registry_logic_contract.verify_issuer_schema_binding(bind_issuer_schema_valid) == sp.record(
+    registry_logic_contract.set_binding_deprecated(bind_issuer_schema_valid).run(valid = True, sender = operator_A_address)
+    scenario.verify(registry_logic_contract.verify_binding(bind_issuer_schema_valid) == sp.record(
         binding_exists = True,
         status = 2
     ))
 
     # Set and verify setting Issuer-Schema binding as active
     scenario.h4("Setting Issuer-Schema binding as active")
-    registry_logic_contract.set_issuer_schema_binding_active(bind_issuer_schema_valid).run(valid = True, sender = operator_A_address)
-    scenario.verify(registry_logic_contract.verify_issuer_schema_binding(bind_issuer_schema_valid) == sp.record(
+    registry_logic_contract.set_binding_active(bind_issuer_schema_valid).run(valid = True, sender = operator_A_address)
+    scenario.verify(registry_logic_contract.verify_binding(bind_issuer_schema_valid) == sp.record(
         binding_exists = True,
         status = 1
     ))
 
     # Set Issuer status
     scenario.h4("Setting Issuer-Schema binding status")
-    registry_logic_contract.set_issuer_schema_binding_status(set_issuer_schema_binding_status_valid).run(valid = True, sender = operator_A_address)
+    registry_logic_contract.set_binding_status(set_binding_status_valid).run(valid = True, sender = operator_A_address)
 
     # FAIL - Sender is not the owner of the Issuer
     scenario.h4("FAIL - Setting Issuer-Schema binding status, non-valid operator")
-    registry_logic_contract.set_issuer_schema_binding_status(set_issuer_schema_binding_status_invalid).run(valid = False, sender = operator_B_address)
+    registry_logic_contract.set_binding_status(set_binding_status_invalid).run(valid = False, sender = operator_B_address)
 
     # FAIL - Status ID does not exist
     scenario.h4("FAIL - Setting Issuer-Schema binding status, status ID does not exist")
-    registry_logic_contract.set_issuer_schema_binding_status(set_issuer_schema_binding_status_invalid).run(valid = False, sender = operator_A_address)
+    registry_logic_contract.set_binding_status(set_binding_status_invalid).run(valid = False, sender = operator_A_address)

@@ -70,7 +70,7 @@ class SchemaRegistry(sp.Contract):
         self.data.issuer_schema_map[parameters.issuer_did] = {parameters.schema_binding.schema_id: parameters.schema_binding.status}
 
     @sp.entry_point
-    def change_issuer_schema_binding_status(self, parameters):
+    def set_binding_status(self, parameters):
         # Defining the parameters' types
         sp.set_type(parameters.issuer_did, sp.TString)
         sp.set_type(parameters.schema_id, sp.TNat)
@@ -82,7 +82,7 @@ class SchemaRegistry(sp.Contract):
         self.data.issuer_schema_map[parameters.issuer_did][parameters.schema_id] = parameters.status
     
     @sp.onchain_view()
-    def verify_issuer_schema_binding(self, parameters):
+    def verify_binding(self, parameters):
         # Defining the parameters' types
         sp.set_type(parameters.issuer_did, sp.TString)
         sp.set_type(parameters.schema_id, sp.TNat)
