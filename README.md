@@ -64,9 +64,9 @@ This is the contract that does not implement any functionality or has storage. I
 
 You will need to have a **Wallet** on an existing Tezos Testnet. We have used **Ithacanet** for our tests.
 
-1. In the **registryLogic** contract, define the first parameter of **sp.add_compilation_target**, define the first parameter of **sp.add_compilation_target**, **Registry** as the address of your originated **registryLogic** contract.
+1. In the **registryLogic** contract, define the first parameter of **sp.add_compilation_target**, **RegistryLogic** as the address of your **Wallet**.
 2. Compile and Originate the **registryLogic** contract.
-3. In the **registry** (lambda) contract, define the second parameter of **sp.add_compilation_target**, **Registry** as the address of your originated **registryLogic** contract.
+3. In the **registry** (lambda) contract, define the first parameter of **sp.add_compilation_target**, **Registry** as the address of your originated **registryLogic** contract.
 3. In the **registry** (lambda) contract, define the second parameter of **sp.add_compilation_target**, **Registry** as the address of your **Wallet**.
 2. Compile and Originate the **registry** contract.
 4. In the **Storage** contracts (**issuerRegistry** and **schemaRegistry**), define the first parameter of **sp.add_compilation_target**, **IssuerRegistry** and **SchemaRegistry** as the address of your originated **registryLogic** contract.
