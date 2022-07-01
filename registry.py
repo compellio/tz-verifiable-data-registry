@@ -230,7 +230,7 @@ class Registry(sp.Contract):
         contract_data = sp.TRecord(issuer_did = sp.TString, owner_address = sp.TAddress)
 
         # Defining the Logic contract itself and its entry point for the call
-        logic_contract = sp.contract(contract_data, self.data.logic_contract, "set_issuer_status").open_some()
+        logic_contract = sp.contract(contract_data, self.data.logic_contract, "set_issuer_owner").open_some()
 
         # Defining the parameters that will be passed to the Logic contract
         params = sp.record(
@@ -252,7 +252,6 @@ class Registry(sp.Contract):
             self.data.logic_contract,
             issuer_did,
             t = sp.TRecord(
-                issuer_did  = sp.TString,
                 issuer_data = sp.TString,
                 status = sp.TString
             )

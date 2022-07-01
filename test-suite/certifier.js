@@ -6,7 +6,7 @@ const { BeaconWallet } = require('@taquito/beacon-wallet');
 function initUI() {
     updateUISetting({
         provider: "https://ghostnet.ecadinfra.com",
-        contractAddress: "KT1MoSz8nXD6sW2KXNvjxxRbx4fzPjexhUM7"
+        contractAddress: "KT1KDKY8fQS8Hg8nP1cdsPqntfdmx1F8zpbL"
     });
 
     // setup UI actions
@@ -219,7 +219,7 @@ function set_issuer_owner(issuer_did, issuer_address) {
             clearAll()
             showResultAlert("Sending...", "alert-info");
 
-            return contract.methods.set_issuer_owner(String(issuer_did), String(issuer_address)).send();
+            return contract.methods.set_issuer_owner(String(issuer_did), issuer_address).send();
         })
         .then((op) => {
             showResultAlert("Waiting for confirmation...", "alert-info");
@@ -278,7 +278,7 @@ function get_issuer(issuer_did) {
             clearAll()
             showResultAlert("Getting...", "alert-info");
 
-            return contract.contractViews.get_issuer(issuer_did).executeView({ viewCaller: contractCallFib });
+            return contract.contractViews.get_issuer(String(issuer_did)).executeView({ viewCaller: contractCallFib });
         })
         .then((viewResult) => {
             showResultAlert("Finished", "alert-success");
@@ -351,12 +351,17 @@ function verify_binding(issuer_did, schema_id) {
     const accountSettings = readUISettings();
     const contractCallFib = accountSettings.contractAddress;
 
+    var record = {
+        "issuer_did": String(issuer_did),
+        "schema_id": parseInt(schema_id)
+    }
+
     return tezos.wallet.at(accountSettings.contractAddress)
         .then((contract) => {
             clearAll()
             showResultAlert("Getting...", "alert-info");
 
-            return contract.contractViews.verify_binding(String(issuer_did), parseInt(schema_id)).executeView({ viewCaller: contractCallFib });
+            return contract.contractViews.verify_binding(record).executeView({ viewCaller: contractCallFib });
         })
         .then((viewResult) => {
             showResultAlert("Finished", "alert-success");
