@@ -55,6 +55,9 @@ This contract's endpoints implement the calls for all registry functionality:
   - set_schema_active
   - set_schema_deprecated
   - set_schema_status
+  - set_binding_active
+  - set_binding_deprecated
+  - set_binding_status
 - update_contract_address: Endpoint for updating the address of the storage contracts.
 
 ### Registry (Lambda Contract)
