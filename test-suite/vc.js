@@ -5,14 +5,14 @@ const { BeaconWallet } = require('@taquito/beacon-wallet');
 
 function initUI() {
     updateUISetting({
-        provider: "https://ghostnet.ecadinfra.com",
+        provider: "https://ithacanet.ecadinfra.com",
         contractAddress: "KT1KDKY8fQS8Hg8nP1cdsPqntfdmx1F8zpbL"
     });
 
     // setup UI actions
 
     // Add schema
-    $("#btn_add_schema").click(() => add_schema($("schema_data").val()));
+    $("#btn_add_schema").click(() => add_schema($("#schema_data").val()));
 
     // Set schema status
     $("#btn_schema_activate").click(() => set_schema_status($("#schema_id_status").val(), "activate"));
@@ -126,7 +126,6 @@ function add_schema(schema_data) {
             return op.confirmation(1).then(() => op);
         })
         .then((data) => {
-            console.log(data)
             showResultAlert(`Created new Schema <a class="btn btn-success ms-2" target="_blank" href="${browser_operations_url + data.opHash}">See Operation</a>`, "alert-success");
         })
         .catch((error) => {
