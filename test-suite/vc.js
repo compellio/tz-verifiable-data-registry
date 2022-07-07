@@ -126,6 +126,7 @@ function add_schema(schema_data) {
             return op.confirmation(1).then(() => op);
         })
         .then((data) => {
+            console.log(data)
             showResultAlert(`Created new Schema <a class="btn btn-success ms-2" target="_blank" href="${browser_operations_url + data.opHash}">See Operation</a>`, "alert-success");
         })
         .catch((error) => {
