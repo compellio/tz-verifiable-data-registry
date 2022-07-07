@@ -94,7 +94,7 @@ function connectWallet() {
 
     const options = {
         name: 'Schema Registry',
-        preferredNetwork: "ghostnet"
+        preferredNetwork: "ithacanet"
     };
     wallet = new BeaconWallet(options);
 
