@@ -112,6 +112,11 @@
                                             data-bs-target="#pills-issuer-owner-update" type="button" role="tab"
                                             aria-controls="pills-issuer-owner-update" aria-selected="false">Issuer Owner Update</button>
                                     </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="pills-issuer-get-tab" data-bs-toggle="pill"
+                                            data-bs-target="#pills-issuer-get" type="button" role="tab"
+                                            aria-controls="pills-issuer-get" aria-selected="false">Get Issuer</button>
+                                    </li>
                                 </ul>
                                 <input class="form-control mt-2" type="text" id="issuer_did" placeholder="Issuer DID" />
                                 
@@ -119,7 +124,8 @@
                                     <div class="tab-pane fade show active" id="pills-issuer-data-update" role="tabpanel" aria-labelledby="pills-home-tab">
                                         <h5 class="title-bar mt-4">Create Issuer / Update Data</h4>
                                         <textarea class="form-control mt-2 w-100" type="textarea" id="issuer_data" placeholder="Issuer Data" rows="3"></textarea >
-                                        <a href="#" id="btn_issuer_issue" class="btn btn-primary mt-2">Add/Update</a>
+                                        <a href="#" id="btn_issuer_issue" class="btn btn-primary mt-2">Create</a>
+                                        <a href="#" id="btn_issuer_update_data" class="btn btn-primary mt-2">Update Data</a>
                                     </div>
                                     <div class="tab-pane fade" id="pills-issuer-status-update" role="tabpanel" aria-labelledby="pills-profile-tab">
                                         <h5 class="title-bar mt-4">Update Issuer Status</h5>
@@ -135,15 +141,11 @@
                                         <input class="form-control" type="text" id="issuer_owner" placeholder="Issuer Owner Address" />
                                         <a href="#" id="btn_issuer_owner_update" class="btn btn-primary mt-2">Update</a>
                                     </div>
+                                    <div class="tab-pane fade" id="pills-issuer-get" role="tabpanel" aria-labelledby="pills-contact-tab">
+                                        <h5 class="title-bar mt-4">Get Issuer</h5>
+                                        <a href="#" id="btn_issuer_get" class="btn btn-primary mt-2">Get</a>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <hr/> 
-
-                            <h4 class="title-bar">Get Issuer</h4>
-                            <div class="content-box">
-                                <input class="form-control" type="text" id="issuer_id_get" placeholder="Issuer DID" />
-                                <a href="#" id="btn_issuer_get" class="btn btn-primary mt-2">Get</a>
                             </div>
                         </div>
                     </div>
@@ -171,7 +173,14 @@
                 </div>
             </div>
         </div>
-
+        <div id="result-loader" class="d-none flex-column align-items-center justify-content-center mt-4">
+            <div class="row">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
+            <div class="row text-primary">
+                <strong>Fetching results</strong>
+            </div>
+        </div>
         <div id="view-result" class="d-none justify-content-center">
             <div class="d-flex flex-column w-50 mt-4">
                 <h4 class="title-bar">Result</h4>

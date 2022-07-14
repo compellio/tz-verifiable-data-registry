@@ -300,7 +300,7 @@ class RegistryLogic(sp.Contract):
 
         # Check if issuer does not exist, does not allow add call otherwise
         # This is to avoid update from unauthorized
-        sp.verify(~self.check_issuer_exists(parameters.issuer_did), message = "Issuer did already exists")
+        sp.verify(self.check_issuer_exists(parameters.issuer_did) == sp.bool(False), message = "Issuer did already exists")
 
         # Defining the data expected by the Storage contract
         contract_data = sp.TRecord(issuer_did = sp.TString, issuer_data = sp.TString, issuer_owner = sp.TAddress, status = sp.TNat)
@@ -502,6 +502,7 @@ class RegistryLogic(sp.Contract):
         # Format result
         result_issuer = sp.record(
             issuer_data = issuer.issuer_data,
+            issuer_owner = issuer.issuer_owner,
             status = self.data.issuer_statuses[issuer.status]
         )
 

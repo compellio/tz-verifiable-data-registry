@@ -253,6 +253,7 @@ class Registry(sp.Contract):
             issuer_did,
             t = sp.TRecord(
                 issuer_data = sp.TString,
+                issuer_owner = sp.TAddress,
                 status = sp.TString
             )
         ).open_some("Invalid view");
@@ -376,7 +377,7 @@ def test():
 
     sp.add_compilation_target("registry",
         Registry(
-            sp.address('KT1_contract_address'),
-            sp.address('tz1_certifier_address')
+            sp.address('KT1AQCwR1VJQGJrXnMQakX3J8b1hxaAKyRGy'),
+            sp.address('tz1WM1wDM4mdtD3qMiELJSgbB14ZryyHNu7P')
         )
     )
