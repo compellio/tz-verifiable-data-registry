@@ -430,7 +430,8 @@ function set_binding_status(issuer_did, schema_id, status_operation, status_id =
                     method = contract.methods.set_binding_deprecated(String(issuer_did), parseInt(schema_id))
                     break;
                 case "set":
-                    method = contract.methods.set_binding_status(parseInt(schema_id), parseInt(status_id), String(issuer_did))
+                    console.log(parseInt(schema_id), parseInt(status_id), String(issuer_did))
+                    method = contract.methods.set_binding_status(String(issuer_did), parseInt(schema_id), parseInt(status_id))
                     break;
               }
 
