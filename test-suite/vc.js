@@ -74,6 +74,10 @@ function showViewResult(result)
 
 function showResultAlert(result, type)
 {
+    if (type === 'alert-danger') {
+        $("#result-loader").addClass('d-none').removeClass('d-flex')
+    }
+
     $("#alert-result").attr('class', `alert ${type}`);
     $("#alert-result").html(result)
 }
@@ -86,8 +90,24 @@ function clearAll()
     $("#alert-result").html("")
 }
 
+function isASCII(str)
+{
+    return /^[\x00-\x7F]*$/.test(str);
+}
+
+function activateTabs()
+{
+    var pillElements = document.querySelectorAll('button[data-bs-toggle="pill"]')
+    pillElements.forEach(function(pillElement) {
+        pillElement.addEventListener('shown.bs.tab', function () {
+            clearAll()
+        })
+    });
+}
+
 let tezos, wallet;
 let browser_operations_url = "https://jakartanet.tzkt.io/" 
+let non_ascii_char_message = 'Input string contains characters not allowed in Michelson. For more info see the <a target="_blank" href="https://tezos.gitlab.io/michelson-reference/#type-string">Michelson reference for type string</a>' 
 
 // This function will connect your application with the wallet
 function connectWallet() {
@@ -98,6 +118,7 @@ function connectWallet() {
         name: 'Schema Registry',
         preferredNetwork: "jakartanet"
     };
+    
     wallet = new BeaconWallet(options);
 
     wallet
@@ -110,11 +131,17 @@ function connectWallet() {
         .then((address) => console.log(address))
         .then(() => tezos.setWalletProvider(wallet))
         .then(() => $('#app-overlay').remove())
-        .then(() => $('#settings-pills').removeClass("d-none"));
+        .then(() => $('#settings-pills').removeClass("d-none"))
+        .then(() => activateTabs());
 }
 
 function add_schema(schema_data) {
     const accountSettings = readUISettings();
+
+    if (isASCII(String(schema_data)) === false) {
+        showResultAlert(non_ascii_char_message, "alert-danger")
+        return;
+    }
 
     return tezos.wallet.at(accountSettings.contractAddress)
         .then((contract) => {
@@ -199,6 +226,15 @@ function get_schema(schema_id, show_alert = true) {
 function add_issuer(issuer_did, issuer_data) {
     const accountSettings = readUISettings();
 
+    if (
+        isASCII(String(issuer_did)) === false
+        ||
+        isASCII(String(issuer_data)) === false
+    ) {
+        showResultAlert(non_ascii_char_message, "alert-danger")
+        return;
+    }
+
     return tezos.wallet.at(accountSettings.contractAddress)
         .then((contract) => {
             clearAll()
@@ -221,6 +257,15 @@ function add_issuer(issuer_did, issuer_data) {
 
 function update_issuer_data(issuer_did, issuer_data) {
     const accountSettings = readUISettings();
+
+    if (
+        isASCII(String(issuer_did)) === false
+        ||
+        isASCII(String(issuer_data)) === false
+    ) {
+        showResultAlert(non_ascii_char_message, "alert-danger")
+        return;
+    }
 
     return tezos.wallet.at(accountSettings.contractAddress)
         .then((contract) => {
@@ -245,6 +290,10 @@ function update_issuer_data(issuer_did, issuer_data) {
 function set_issuer_owner(issuer_did, issuer_address) {
     const accountSettings = readUISettings();
 
+    if (isASCII(String(issuer_did)) === false) {
+        showResultAlert(non_ascii_char_message, "alert-danger")
+    }
+
     return tezos.wallet.at(accountSettings.contractAddress)
         .then((contract) => {
             clearAll()
@@ -267,6 +316,10 @@ function set_issuer_owner(issuer_did, issuer_address) {
 
 function set_issuer_status(issuer_did, status_operation, status_id = 0) {
     const accountSettings = readUISettings();
+
+    if (isASCII(String(issuer_did)) === false) {
+        showResultAlert(non_ascii_char_message, "alert-danger")
+    }
 
     let method;
 
@@ -306,6 +359,10 @@ function get_issuer(issuer_did, show_alert = true) {
     const accountSettings = readUISettings();
     const contractCallFib = accountSettings.contractAddress;
 
+    if (isASCII(String(issuer_did)) === false) {
+        showResultAlert(non_ascii_char_message, "alert-danger")
+    }
+
     $("#result-loader").addClass('d-flex').removeClass('d-none')
 
     return tezos.wallet.at(accountSettings.contractAddress)
@@ -326,6 +383,10 @@ function get_issuer(issuer_did, show_alert = true) {
 
 function bind_issuer_schema(issuer_did, schema_id) {
     const accountSettings = readUISettings();
+
+    if (isASCII(String(issuer_did)) === false) {
+        showResultAlert(non_ascii_char_message, "alert-danger")
+    }
 
     return tezos.wallet.at(accountSettings.contractAddress)
         .then((contract) => {
@@ -349,6 +410,10 @@ function bind_issuer_schema(issuer_did, schema_id) {
 
 function set_binding_status(issuer_did, schema_id, status_operation, status_id = 0) {
     const accountSettings = readUISettings();
+
+    if (isASCII(String(issuer_did)) === false) {
+        showResultAlert(non_ascii_char_message, "alert-danger")
+    }
 
     let method;
 
@@ -387,6 +452,10 @@ function set_binding_status(issuer_did, schema_id, status_operation, status_id =
 function verify_binding(issuer_did, schema_id, show_alert = true) {
     const accountSettings = readUISettings();
     const contractCallFib = accountSettings.contractAddress;
+
+    if (isASCII(String(issuer_did)) === false) {
+        showResultAlert(non_ascii_char_message, "alert-danger")
+    }
 
     $("#result-loader").addClass('d-flex').removeClass('d-none')
 
