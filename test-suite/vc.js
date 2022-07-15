@@ -148,7 +148,7 @@ function add_schema(schema_data) {
             clearAll()
             showResultAlert("Sending...", "alert-info");
 
-            return contract.methods.add_schema(encodeURIComponent(String(schema_data))).send();
+            return contract.methods.add_schema(String(schema_data)).send();
         })
         .then((op) => {
             showResultAlert("Waiting for confirmation...", "alert-info");
