@@ -1,8 +1,23 @@
+
 # Tezos Verifiable Data Registry Test Suite
 
 You will need to have a **Wallet** on an existing Tezos Testnet. We have used **Hangzhounet** for our tests.
 
 For implementing the test process, we created a test suite that relies on the [Taquito](https://tezostaquito.io/) library in order to design and perform test calls to smart contracts. Interfacing with the **Wallet** is done through the [Beacon SDK](https://github.com/airgap-it/beacon-sdk).
+
+## Supported Wallets
+The contracts used in the Test Suite were originated on the **Jakartanet** testnet. Since not all Wallets support Jakartanet, support for now is limited to the following implementations. This list will be updated.
+
+| Wallet | Status | Notes |
+|--|--|--|
+| Temple Wallet | Working | - |
+| AirGap Wallet | Working | - |
+| Kukai Wallet | Not Working | Supports Jakartanet, but Beacon SDK redirects to wrong page for pairing request |
+| Spire Wallet | Not Working | Does not support Jakartanet for now |
+| Galleon Wallet | Not Working| Does not support Jakartanet for now |
+| Umami Wallet | Not Working| Does not support Jakartanet for now |
+| Naan Wallet | Not Working| Does not support Jakartanet for now |
+| Autonomy Wallet | Not Tested | - |
 
 ## Installation
 
