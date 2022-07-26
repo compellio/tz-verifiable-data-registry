@@ -1,6 +1,6 @@
 
 const $ = require("jquery");
-const { TezosToolkit } = require('@taquito/taquito');
+const { TezosToolkit, Operation } = require('@taquito/taquito');
 const { BeaconWallet } = require('@taquito/beacon-wallet');
 
 function initUI() {
@@ -105,7 +105,7 @@ function activateTabs()
     });
 }
 
-let tezos, wallet;
+let tezos, wallet, current_operation_hash;
 let browser_operations_url = "https://jakartanet.tzkt.io/" 
 let non_ascii_char_message = 'Input string contains characters not allowed in Michelson. For more info see the <a target="_blank" href="https://tezos.gitlab.io/michelson-reference/#type-string">Michelson reference for type string</a>' 
 
@@ -152,11 +152,16 @@ function add_schema(schema_data) {
         })
         .then((op) => {
             showResultAlert("Waiting for confirmation...", "alert-info");
-            return op.confirmation(1).then(() => op);
+            return op.confirmation().then(() => op);
+        })
+        .then((op) => {
+            current_operation_hash = op.opHash
+            return op.transactionOperation();
         })
         .then((data) => {
-            let schema_id = data._operationResult._events[0][0].metadata.internal_operation_results[1].result.storage[2]["int"] - 1
-            showResultAlert(`Created new Schema with ID ${schema_id} <a class="btn btn-success ms-2" target="_blank" href="${browser_operations_url + data.opHash}">See Operation</a>`, "alert-success");
+            let schema_id = data.metadata.internal_operation_results[1].result.storage[2]["int"] - 1
+            
+            showResultAlert(`Created new Schema with ID ${schema_id} <a class="btn btn-success ms-2" target="_blank" href="${browser_operations_url + current_operation_hash}">See Operation</a>`, "alert-success");
             get_schema(schema_id, false);
         })
         .catch((error) => {
