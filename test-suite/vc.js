@@ -1,6 +1,6 @@
 
 const $ = require("jquery");
-const { TezosToolkit } = require('@taquito/taquito');
+const { TezosToolkit, Operation } = require('@taquito/taquito');
 const { BeaconWallet } = require('@taquito/beacon-wallet');
 
 function initUI() {
@@ -65,15 +65,13 @@ function readUISettings() {
     };
 }
 
-function showViewResult(result)
-{
+function showViewResult(result) {
     $("#result-loader").addClass('d-none').removeClass('d-flex')
     $("#view-result-pre").html(result)
     $("#view-result").addClass('d-flex').removeClass('d-none')
 }
 
-function showResultAlert(result, type)
-{
+function showResultAlert(result, type) {
     if (type === 'alert-danger') {
         $("#result-loader").addClass('d-none').removeClass('d-flex')
     }
@@ -82,23 +80,20 @@ function showResultAlert(result, type)
     $("#alert-result").html(result)
 }
 
-function clearAll()
-{
+function clearAll() {
     $("#view-result").addClass('d-none')
     $("#view-result-pre").html("")
     $("#alert-result").attr('class', 'd-none');
     $("#alert-result").html("")
 }
 
-function isASCII(str)
-{
+function isASCII(str) {
     return /^[\x00-\x7F]*$/.test(str);
 }
 
-function activateTabs()
-{
+function activateTabs() {
     var pillElements = document.querySelectorAll('button[data-bs-toggle="pill"]')
-    pillElements.forEach(function(pillElement) {
+    pillElements.forEach(function (pillElement) {
         pillElement.addEventListener('shown.bs.tab', function () {
             clearAll()
         })
@@ -106,8 +101,8 @@ function activateTabs()
 }
 
 let tezos, wallet;
-let browser_operations_url = "https://jakartanet.tzkt.io/" 
-let non_ascii_char_message = 'Input string contains characters not allowed in Michelson. For more info see the <a target="_blank" href="https://tezos.gitlab.io/michelson-reference/#type-string">Michelson reference for type string</a>' 
+let browser_operations_url = "https://jakartanet.tzkt.io/"
+let non_ascii_char_message = 'Input string contains characters not allowed in Michelson. For more info see the <a target="_blank" href="https://tezos.gitlab.io/michelson-reference/#type-string">Michelson reference for type string</a>'
 
 // This function will connect your application with the wallet
 function connectWallet() {
@@ -118,7 +113,7 @@ function connectWallet() {
         name: 'Schema Registry',
         preferredNetwork: "jakartanet"
     };
-    
+
     wallet = new BeaconWallet(options);
 
     wallet
@@ -152,12 +147,17 @@ function add_schema(schema_data) {
         })
         .then((op) => {
             showResultAlert("Waiting for confirmation...", "alert-info");
-            return op.confirmation(1).then(() => op);
+            return op.confirmation().then(() => op);
         })
-        .then((data) => {
-            let schema_id = data._operationResult._events[0][0].metadata.internal_operation_results[1].result.storage[2]["int"] - 1
-            showResultAlert(`Created new Schema with ID ${schema_id} <a class="btn btn-success ms-2" target="_blank" href="${browser_operations_url + data.opHash}">See Operation</a>`, "alert-success");
-            get_schema(schema_id, false);
+        .then((op) => {
+            (
+                async () => {
+                    let data = await op.transactionOperation();
+                    let schema_id = data.metadata.internal_operation_results[1].result.storage[2]["int"] - 1
+                    showResultAlert(`Created new Schema with ID ${schema_id} <a class="btn btn-success ms-2" target="_blank" href="${browser_operations_url + op.opHash}">See Operation</a>`, "alert-success");
+                    get_schema(schema_id, false);
+                }
+            )();
         })
         .catch((error) => {
             showResultAlert(error.message, "alert-danger");
@@ -174,7 +174,7 @@ function set_schema_status(schema_id, status_operation, status_id = 0) {
             clearAll()
             showResultAlert("Sending...", "alert-info");
 
-            switch(status_operation) {
+            switch (status_operation) {
                 case "activate":
                     method = contract.methods.set_schema_active(parseInt(schema_id))
                     break;
@@ -184,7 +184,7 @@ function set_schema_status(schema_id, status_operation, status_id = 0) {
                 case "set":
                     method = contract.methods.set_schema_status(parseInt(schema_id), parseInt(status_id))
                     break;
-              }
+            }
 
             return method.send();
         })
@@ -328,7 +328,7 @@ function set_issuer_status(issuer_did, status_operation, status_id = 0) {
             clearAll()
             showResultAlert("Sending...", "alert-info");
 
-            switch(status_operation) {
+            switch (status_operation) {
                 case "activate":
                     method = contract.methods.set_issuer_active(String(issuer_did))
                     break;
@@ -338,7 +338,7 @@ function set_issuer_status(issuer_did, status_operation, status_id = 0) {
                 case "set":
                     method = contract.methods.set_issuer_status(String(issuer_did), parseInt(status_id))
                     break;
-              }
+            }
 
             return method.send();
         })
@@ -422,7 +422,7 @@ function set_binding_status(issuer_did, schema_id, status_operation, status_id =
             clearAll()
             showResultAlert("Sending...", "alert-info");
 
-            switch(status_operation) {
+            switch (status_operation) {
                 case "activate":
                     method = contract.methods.set_binding_active(String(issuer_did), parseInt(schema_id))
                     break;
@@ -432,7 +432,7 @@ function set_binding_status(issuer_did, schema_id, status_operation, status_id =
                 case "set":
                     method = contract.methods.set_binding_status(String(issuer_did), parseInt(schema_id), parseInt(status_id))
                     break;
-              }
+            }
 
             return method.send();
         })

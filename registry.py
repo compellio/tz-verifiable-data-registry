@@ -377,7 +377,7 @@ def test():
 
     sp.add_compilation_target("registry",
         Registry(
-            sp.address('KT1AQCwR1VJQGJrXnMQakX3J8b1hxaAKyRGy'),
-            sp.address('tz1WM1wDM4mdtD3qMiELJSgbB14ZryyHNu7P')
+            sp.address('KT1_contract_address'),
+            sp.address('tz1_certifier_address')
         )
     )
